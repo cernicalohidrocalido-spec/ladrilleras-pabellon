@@ -387,13 +387,23 @@ h1 {
 }
 
 /* Selector propio de capas (Calles/Satélite) */
-.capas-selector {
+.mapa-toolbar-row {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.capas-toolbar {
+  display: inline-flex;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(31,34,51,0.15);
+  width: fit-content;
+  margin: 6px 0 12px 0;
 }
 
 .capas-btn {

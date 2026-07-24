@@ -1,7 +1,7 @@
-import { db, collection, addDoc, getDocs, doc, Timestamp, GeoPoint } from "./db.js?v=5";
-import { abrirModal, cerrarModal, pillHtml, formatFechaHora, distanciaMetros, calcularEstadoPermiso } from "./utils.js?v=5";
-import { listarHornos } from "./hornos.js?v=5";
-import { listarPermisos } from "./permisos.js?v=5";
+import { db, collection, addDoc, getDocs, doc, Timestamp, GeoPoint } from "./db.js?v=6";
+import { abrirModal, cerrarModal, pillHtml, formatFechaHora, distanciaMetros, calcularEstadoPermiso } from "./utils.js?v=6";
+import { listarHornos } from "./hornos.js?v=6";
+import { listarPermisos } from "./permisos.js?v=6";
 
 const reportesCol = collection(db, "reportes_quema");
 

@@ -1,9 +1,10 @@
-import { calcularEstadoPermiso } from "./utils.js?v=5";
+import { calcularEstadoPermiso } from "./utils.js?v=6";
 
 // Coordenadas reales de la cabecera municipal de Pabellón de Arteaga, Ags.
 export const CENTRO_PABELLON = [22.1492, -102.2765];
 
 let mapaInstancia = null;
+let capasMapaPrincipal = null;
 
 const COLOR_ESTADO = {
   vigente: "#0B7A34",
@@ -11,47 +12,10 @@ const COLOR_ESTADO = {
   vencido: "#B23A2A",
 };
 
-// Botones propios de Calles/Satélite (en vez del control nativo de Leaflet,
-// que causaba conflictos de clic dentro del mapa). Control 100% determinista:
-// nosotros decidimos exactamente qué capa se añade o se quita del mapa.
-function agregarSelectorDeCapas(mapa, calles, satelital) {
-  const Selector = L.Control.extend({
-    options: { position: "topright" },
-    onAdd() {
-      const contenedor = L.DomUtil.create("div", "capas-selector");
-      contenedor.innerHTML = `
-        <button type="button" class="capas-btn activa" data-capa="calles">Calles</button>
-        <button type="button" class="capas-btn" data-capa="satelital">Satélite</button>
-      `;
-
-      L.DomEvent.disableClickPropagation(contenedor);
-      L.DomEvent.disableScrollPropagation(contenedor);
-
-      contenedor.querySelectorAll(".capas-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          contenedor.querySelectorAll(".capas-btn").forEach((b) => b.classList.remove("activa"));
-          btn.classList.add("activa");
-
-          if (btn.dataset.capa === "satelital") {
-            if (mapa.hasLayer(calles)) mapa.removeLayer(calles);
-            if (!mapa.hasLayer(satelital)) mapa.addLayer(satelital);
-          } else {
-            if (mapa.hasLayer(satelital)) mapa.removeLayer(satelital);
-            if (!mapa.hasLayer(calles)) mapa.addLayer(calles);
-          }
-        });
-      });
-
-      return contenedor;
-    },
-  });
-
-  mapa.addControl(new Selector());
-}
-
-// Crea las capas base (calles / satélite). Reutilizable por cualquier mapa
-// Leaflet del dashboard.
-export function agregarCapasBase(mapa) {
+// Crea (sin añadir aún) las dos capas base. No usa ningún control flotante
+// de Leaflet — el toggle se maneja con botones normales de HTML, fuera del
+// mapa, para que nunca puedan interferir con el clic o el arrastre del mapa.
+export function crearCapasBase() {
   const calles = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "&copy; OpenStreetMap contributors",
     maxZoom: 19,
@@ -66,16 +30,38 @@ export function agregarCapasBase(mapa) {
     }
   );
 
-  calles.addTo(mapa);
-  agregarSelectorDeCapas(mapa, calles, satelital);
+  return { calles, satelital };
+}
 
-  return mapa;
+// Conecta un par de botones HTML (fuera del mapa) para alternar entre capas.
+export function conectarBotonesCapas(botonCallesId, botonSatelitalId, mapa, capas) {
+  const btnCalles = document.getElementById(botonCallesId);
+  const btnSatelital = document.getElementById(botonSatelitalId);
+  if (!btnCalles || !btnSatelital) return;
+
+  function activar(tipo) {
+    btnCalles.classList.toggle("activa", tipo === "calles");
+    btnSatelital.classList.toggle("activa", tipo === "satelital");
+
+    if (tipo === "satelital") {
+      if (mapa.hasLayer(capas.calles)) mapa.removeLayer(capas.calles);
+      if (!mapa.hasLayer(capas.satelital)) mapa.addLayer(capas.satelital);
+    } else {
+      if (mapa.hasLayer(capas.satelital)) mapa.removeLayer(capas.satelital);
+      if (!mapa.hasLayer(capas.calles)) mapa.addLayer(capas.calles);
+    }
+  }
+
+  btnCalles.addEventListener("click", () => activar("calles"));
+  btnSatelital.addEventListener("click", () => activar("satelital"));
 }
 
 export function inicializarMapa() {
   if (mapaInstancia) return mapaInstancia;
   mapaInstancia = L.map("mapa", { zoomControl: true }).setView(CENTRO_PABELLON, 14);
-  agregarCapasBase(mapaInstancia);
+  capasMapaPrincipal = crearCapasBase();
+  capasMapaPrincipal.calles.addTo(mapaInstancia);
+  conectarBotonesCapas("btn-capa-calles", "btn-capa-satelital", mapaInstancia, capasMapaPrincipal);
   return mapaInstancia;
 }
 
@@ -111,7 +97,7 @@ export function pintarHornosEnMapa(hornos, permisosPorHorno) {
 let mapaPickerInstancia = null;
 let marcadorPicker = null;
 
-export function inicializarMapaPicker(contenedorId, onUbicacionElegida, centroInicial) {
+export function inicializarMapaPicker(contenedorId, onUbicacionElegida, centroInicial, botonesCapasIds) {
   // Si ya existe una instancia previa (modal reabierto), la destruye primero.
   if (mapaPickerInstancia) {
     mapaPickerInstancia.remove();
@@ -121,7 +107,12 @@ export function inicializarMapaPicker(contenedorId, onUbicacionElegida, centroIn
 
   const centro = centroInicial || CENTRO_PABELLON;
   mapaPickerInstancia = L.map(contenedorId, { zoomControl: true }).setView(centro, 15);
-  agregarCapasBase(mapaPickerInstancia);
+
+  const capas = crearCapasBase();
+  capas.calles.addTo(mapaPickerInstancia);
+  if (botonesCapasIds) {
+    conectarBotonesCapas(botonesCapasIds.calles, botonesCapasIds.satelital, mapaPickerInstancia, capas);
+  }
 
   function colocarMarcador(lat, lng) {
     if (marcadorPicker) {

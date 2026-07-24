@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<link rel="stylesheet" href="css/styles.css?v=5">
+<link rel="stylesheet" href="css/styles.css?v=6">
 </head>
 <body>
 
@@ -112,10 +112,16 @@
     <section id="section-mapa" class="section">
       <h1>Mapa de hornos</h1>
       <p class="section-sub">Estado de permiso por horno registrado.</p>
-      <div class="legend">
-        <span><i class="dot dot-vigente"></i> Vigente</span>
-        <span><i class="dot dot-vencer"></i> Por vencer</span>
-        <span><i class="dot dot-vencido"></i> Vencido / sin permiso</span>
+      <div class="mapa-toolbar-row">
+        <div class="legend">
+          <span><i class="dot dot-vigente"></i> Vigente</span>
+          <span><i class="dot dot-vencer"></i> Por vencer</span>
+          <span><i class="dot dot-vencido"></i> Vencido / sin permiso</span>
+        </div>
+        <div class="capas-toolbar">
+          <button type="button" class="capas-btn activa" id="btn-capa-calles">Calles</button>
+          <button type="button" class="capas-btn" id="btn-capa-satelital">Satélite</button>
+        </div>
       </div>
       <div id="mapa" class="mapa-container"></div>
     </section>
@@ -221,14 +227,14 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
-<script type="module" src="js/db.js?v=5"></script>
-<script type="module" src="js/utils.js?v=5"></script>
-<script type="module" src="js/hornos.js?v=5"></script>
-<script type="module" src="js/permisos.js?v=5"></script>
-<script type="module" src="js/reportes.js?v=5"></script>
-<script type="module" src="js/mapa.js?v=5"></script>
-<script type="module" src="js/exportar.js?v=5"></script>
-<script type="module" src="js/auth.js?v=5"></script>
-<script type="module" src="js/app.js?v=5"></script>
+<script type="module" src="js/db.js?v=6"></script>
+<script type="module" src="js/utils.js?v=6"></script>
+<script type="module" src="js/hornos.js?v=6"></script>
+<script type="module" src="js/permisos.js?v=6"></script>
+<script type="module" src="js/reportes.js?v=6"></script>
+<script type="module" src="js/mapa.js?v=6"></script>
+<script type="module" src="js/exportar.js?v=6"></script>
+<script type="module" src="js/auth.js?v=6"></script>
+<script type="module" src="js/app.js?v=6"></script>
 </body>
 </html>

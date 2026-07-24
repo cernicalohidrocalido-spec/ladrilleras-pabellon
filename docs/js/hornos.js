@@ -1,6 +1,6 @@
-import { db, collection, addDoc, getDocs, Timestamp, GeoPoint } from "./db.js?v=5";
-import { abrirModal, cerrarModal } from "./utils.js?v=5";
-import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=5";
+import { db, collection, addDoc, getDocs, Timestamp, GeoPoint } from "./db.js?v=6";
+import { abrirModal, cerrarModal } from "./utils.js?v=6";
+import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=6";
 
 const hornosCol = collection(db, "hornos");
 
@@ -49,9 +49,12 @@ function formHornoHtml() {
       <input type="text" id="f-direccion">
     </label>
 
-    <label>Ubicación — haz clic en el mapa (o arrastra el marcador) para marcar el horno
-      <div id="f-mapa-picker" class="picker-map"></div>
-    </label>
+    <label>Ubicación — haz clic en el mapa (o arrastra el marcador) para marcar el horno</label>
+    <div class="capas-toolbar">
+      <button type="button" class="capas-btn activa" id="f-btn-calles">Calles</button>
+      <button type="button" class="capas-btn" id="f-btn-satelital">Satélite</button>
+    </div>
+    <div id="f-mapa-picker" class="picker-map"></div>
 
     <div class="field-row">
       <label>Latitud
@@ -91,10 +94,15 @@ export function abrirFormularioHorno(onGuardado) {
   const inputLng = document.getElementById("f-lng");
 
   // Mapa selector: al hacer clic o arrastrar el marcador, llena lat/lng.
-  inicializarMapaPicker("f-mapa-picker", (lat, lng) => {
-    inputLat.value = lat.toFixed(6);
-    inputLng.value = lng.toFixed(6);
-  });
+  inicializarMapaPicker(
+    "f-mapa-picker",
+    (lat, lng) => {
+      inputLat.value = lat.toFixed(6);
+      inputLng.value = lng.toFixed(6);
+    },
+    null,
+    { calles: "f-btn-calles", satelital: "f-btn-satelital" }
+  );
 
   // Si el usuario escribe las coordenadas a mano, mueve el marcador también.
   function sincronizarDesdeInputs() {
