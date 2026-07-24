@@ -6,7 +6,7 @@ import {
 import {
   getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { firebaseConfig } from "./config.js";
+import { firebaseConfig } from "./config.js?v=2";
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
