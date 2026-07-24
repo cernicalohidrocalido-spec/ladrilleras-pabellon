@@ -1,9 +1,9 @@
-import { listarHornos, renderTablaHornos, abrirFormularioHorno } from "./hornos.js";
-import { listarPermisos, renderTablaPermisos, abrirFormularioPermiso } from "./permisos.js";
-import { listarReportes, renderTablaReportes, abrirFormularioReporte } from "./reportes.js";
-import { pintarHornosEnMapa } from "./mapa.js";
-import { calcularEstadoPermiso, pillHtml, formatFecha } from "./utils.js";
-import { exportarHornos, exportarPermisos, exportarReportes } from "./exportar.js";
+import { listarHornos, renderTablaHornos, abrirFormularioHorno } from "./hornos.js?v=3";
+import { listarPermisos, renderTablaPermisos, abrirFormularioPermiso } from "./permisos.js?v=3";
+import { listarReportes, renderTablaReportes, abrirFormularioReporte } from "./reportes.js?v=3";
+import { pintarHornosEnMapa } from "./mapa.js?v=3";
+import { calcularEstadoPermiso, pillHtml, formatFecha } from "./utils.js?v=3";
+import { exportarHornos, exportarPermisos, exportarReportes } from "./exportar.js?v=3";
 
 // --- Navegación entre secciones ---
 document.querySelectorAll(".nav-item").forEach((btn) => {

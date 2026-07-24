@@ -1,4 +1,4 @@
-import { calcularEstadoPermiso } from "./utils.js";
+import { calcularEstadoPermiso } from "./utils.js?v=3";
 
 let mapaInstancia = null;
 
