@@ -3,6 +3,7 @@ import { listarPermisos, renderTablaPermisos, abrirFormularioPermiso } from "./p
 import { listarReportes, renderTablaReportes, abrirFormularioReporte } from "./reportes.js";
 import { pintarHornosEnMapa } from "./mapa.js";
 import { calcularEstadoPermiso, pillHtml, formatFecha } from "./utils.js";
+import { exportarHornos, exportarPermisos, exportarReportes } from "./exportar.js";
 
 // --- Navegación entre secciones ---
 document.querySelectorAll(".nav-item").forEach((btn) => {
@@ -173,6 +174,17 @@ document.getElementById("btn-nuevo-permiso").addEventListener("click", () => {
 });
 document.getElementById("btn-nuevo-reporte").addEventListener("click", () => {
   abrirFormularioReporte(cargarTodo);
+});
+
+// --- Exportar a Excel ---
+document.getElementById("btn-exportar-hornos").addEventListener("click", () => {
+  exportarHornos(cacheHornos);
+});
+document.getElementById("btn-exportar-permisos").addEventListener("click", () => {
+  exportarPermisos(cachePermisos, hornosById(cacheHornos));
+});
+document.getElementById("btn-exportar-reportes").addEventListener("click", () => {
+  exportarReportes(cacheReportes, hornosById(cacheHornos));
 });
 
 window.addEventListener("cq:autenticado", cargarTodo);

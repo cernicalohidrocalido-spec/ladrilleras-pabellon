@@ -17,7 +17,7 @@
 <!-- Login -->
 <div id="login-overlay" class="login-overlay">
   <div class="login-box">
-    <div class="brand-mark login-mark">CQ</div>
+    <img src="assets/logo-imbio.jpg" alt="IMBIO" class="brand-mark login-mark">
     <h1>Control de Quema</h1>
     <p class="section-sub">IMBIO · Pabellón de Arteaga</p>
 
@@ -38,7 +38,7 @@
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="brand">
-      <span class="brand-mark">CQ</span>
+      <img src="assets/logo-imbio.jpg" alt="IMBIO" class="brand-mark">
       <div class="brand-text">
         <strong>Control de Quema</strong>
         <span>IMBIO · Pabellón de Arteaga</span>
@@ -127,7 +127,10 @@
           <h1>Hornos</h1>
           <p class="section-sub">Catálogo de hornos registrados en el municipio.</p>
         </div>
-        <button class="btn btn-primary" id="btn-nuevo-horno">+ Registrar horno</button>
+        <div class="header-actions">
+          <button class="btn btn-secondary" id="btn-exportar-hornos">⬇ Exportar Excel</button>
+          <button class="btn btn-primary" id="btn-nuevo-horno">+ Registrar horno</button>
+        </div>
       </div>
       <table class="data-table" id="tabla-hornos">
         <thead>
@@ -150,7 +153,10 @@
           <h1>Permisos</h1>
           <p class="section-sub">Trámites de permiso de quema.</p>
         </div>
-        <button class="btn btn-primary" id="btn-nuevo-permiso">+ Registrar trámite</button>
+        <div class="header-actions">
+          <button class="btn btn-secondary" id="btn-exportar-permisos">⬇ Exportar Excel</button>
+          <button class="btn btn-primary" id="btn-nuevo-permiso">+ Registrar trámite</button>
+        </div>
       </div>
       <table class="data-table" id="tabla-permisos">
         <thead>
@@ -173,7 +179,10 @@
           <h1>Reportes de quema</h1>
           <p class="section-sub">Avisos recibidos y su verificación contra permisos.</p>
         </div>
-        <button class="btn btn-primary" id="btn-nuevo-reporte">+ Registrar reporte</button>
+        <div class="header-actions">
+          <button class="btn btn-secondary" id="btn-exportar-reportes">⬇ Exportar Excel</button>
+          <button class="btn btn-primary" id="btn-nuevo-reporte">+ Registrar reporte</button>
+        </div>
       </div>
       <table class="data-table" id="tabla-reportes">
         <thead>
@@ -211,13 +220,14 @@
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script type="module" src="js/config.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <script type="module" src="js/db.js"></script>
 <script type="module" src="js/utils.js"></script>
 <script type="module" src="js/hornos.js"></script>
 <script type="module" src="js/permisos.js"></script>
 <script type="module" src="js/reportes.js"></script>
 <script type="module" src="js/mapa.js"></script>
+<script type="module" src="js/exportar.js"></script>
 <script type="module" src="js/auth.js"></script>
 <script type="module" src="js/app.js"></script>
 </body>
