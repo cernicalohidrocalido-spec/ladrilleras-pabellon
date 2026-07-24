@@ -138,6 +138,10 @@ body {
 
 .kpi-label { font-size: 12px; color: var(--text-muted); }
 
+.main:has(#section-mapa.active) .kpi-strip {
+  display: none;
+}
+
 .section { display: none; }
 .section.active { display: block; }
 
@@ -292,7 +296,8 @@ h1 {
 .dot-vencido { background: var(--vencido); }
 
 .mapa-container {
-  height: 520px;
+  height: calc(100vh - 230px);
+  min-height: 500px;
   border-radius: var(--radius);
   border: 1px solid var(--border);
   overflow: hidden;
@@ -329,7 +334,7 @@ h1 {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  width: 480px;
+  width: 540px;
   max-width: 92vw;
   max-height: 86vh;
   overflow-y: auto;
@@ -371,6 +376,22 @@ h1 {
   border-radius: 7px;
   font-family: var(--font-ui);
   font-size: 13px;
+}
+
+.picker-map {
+  height: 240px;
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  margin-top: 2px;
+}
+
+/* Control de capas de Leaflet (Calles/Satélite), ajustado a la paleta */
+.leaflet-control-layers {
+  border-radius: 8px !important;
+  border: 1px solid var(--border) !important;
+  font-family: var(--font-ui);
+  font-size: 12px;
 }
 
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }

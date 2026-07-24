@@ -1,5 +1,6 @@
 import { db, collection, addDoc, getDocs, Timestamp, GeoPoint } from "./db.js";
 import { abrirModal, cerrarModal } from "./utils.js";
+import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js";
 
 const hornosCol = collection(db, "hornos");
 
@@ -47,6 +48,11 @@ function formHornoHtml() {
     <label>Dirección
       <input type="text" id="f-direccion">
     </label>
+
+    <label>Ubicación — haz clic en el mapa (o arrastra el marcador) para marcar el horno
+      <div id="f-mapa-picker" class="picker-map"></div>
+    </label>
+
     <div class="field-row">
       <label>Latitud
         <input type="text" id="f-lat" placeholder="22.1234">
@@ -80,14 +86,39 @@ function formHornoHtml() {
 
 export function abrirFormularioHorno(onGuardado) {
   abrirModal("Registrar horno", formHornoHtml());
+
+  const inputLat = document.getElementById("f-lat");
+  const inputLng = document.getElementById("f-lng");
+
+  // Mapa selector: al hacer clic o arrastrar el marcador, llena lat/lng.
+  inicializarMapaPicker("f-mapa-picker", (lat, lng) => {
+    inputLat.value = lat.toFixed(6);
+    inputLng.value = lng.toFixed(6);
+  });
+
+  // Si el usuario escribe las coordenadas a mano, mueve el marcador también.
+  function sincronizarDesdeInputs() {
+    const lat = parseFloat(inputLat.value);
+    const lng = parseFloat(inputLng.value);
+    if (!isNaN(lat) && !isNaN(lng)) {
+      actualizarMarcadorPicker(lat, lng);
+    }
+  }
+  inputLat.addEventListener("change", sincronizarDesdeInputs);
+  inputLng.addEventListener("change", sincronizarDesdeInputs);
+
   document.getElementById("f-guardar").addEventListener("click", async () => {
+    if (!inputLat.value || !inputLng.value) {
+      alert("Marca la ubicación del horno en el mapa antes de guardar.");
+      return;
+    }
     const data = {
       nombre_referencia: document.getElementById("f-nombre").value,
       propietario_nombre: document.getElementById("f-propietario").value,
       propietario_contacto: document.getElementById("f-contacto").value,
       direccion: document.getElementById("f-direccion").value,
-      lat: document.getElementById("f-lat").value,
-      lng: document.getElementById("f-lng").value,
+      lat: inputLat.value,
+      lng: inputLng.value,
       tipo_horno: document.getElementById("f-tipo").value,
       combustible_habitual: document.getElementById("f-combustible").value,
     };
