@@ -334,7 +334,7 @@ h1 {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  width: 540px;
+  width: 600px;
   max-width: 92vw;
   max-height: 86vh;
   overflow-y: auto;
@@ -379,20 +379,37 @@ h1 {
 }
 
 .picker-map {
-  height: 240px;
+  height: 380px;
   width: 100%;
   border-radius: 8px;
   border: 1px solid var(--border);
   margin-top: 2px;
 }
 
-/* Control de capas de Leaflet (Calles/Satélite), ajustado a la paleta */
-.leaflet-control-layers {
-  border-radius: 8px !important;
-  border: 1px solid var(--border) !important;
+/* Selector propio de capas (Calles/Satélite) */
+.capas-selector {
+  display: flex;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(31,34,51,0.15);
+}
+
+.capas-btn {
   font-family: var(--font-ui);
   font-size: 12px;
+  font-weight: 500;
+  border: none;
+  background: var(--surface);
+  color: var(--text-muted);
+  padding: 7px 12px;
+  cursor: pointer;
 }
+
+.capas-btn + .capas-btn { border-left: 1px solid var(--border); }
+.capas-btn.activa { background: var(--navy); color: #fff; }
+.capas-btn:hover:not(.activa) { background: var(--surface-alt); }
 
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
