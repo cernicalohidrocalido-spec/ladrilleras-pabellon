@@ -24,14 +24,15 @@ control-quema-hornos/
 ├── firestore.rules          # Reglas de seguridad de Firestore
 ├── firestore.indexes.json   # Índices compuestos necesarios
 ├── firebase.json            # Configuración de Firebase Hosting
-├── docs/
+├── docs-tecnicos/
 │   └── MODELO_DATOS.md      # Modelo de datos completo documentado
-└── public/                  # Dashboard (sitio estático, sin build step)
-    ├── index.html
+└── docs/                    # Dashboard (sitio estático, sin build step)
+    ├── index.html            # se sirve directo desde GitHub Pages
     ├── css/styles.css
     └── js/
         ├── config.js         # Config de Firebase (rellenar con tus claves)
         ├── db.js             # Helpers de acceso a Firestore
+        ├── auth.js           # Login / logout
         ├── hornos.js         # Alta y listado de hornos
         ├── permisos.js       # Alta y listado de permisos
         ├── reportes.js       # Registro y verificación de reportes de quema
@@ -40,9 +41,12 @@ control-quema-hornos/
         └── app.js            # Navegación entre secciones
 ```
 
+La carpeta se llama `docs/` (no `public/`) porque así GitHub Pages puede
+servirla directamente sin configuración extra.
+
 ## Stack
 
-- **Firebase / Firestore** — base de datos y hosting (mismo stack que AirePuro)
+- **Firebase / Firestore** — base de datos y autenticación (mismo stack que AirePuro)
 - **HTML/CSS/JS vanilla** — sin build step, fácil de mantener y desplegar
 - **Leaflet** + OpenStreetMap — mapa en vivo de hornos
 - Tipografías: **Rubik** (UI, consistente con la identidad de IMBIO) y
@@ -50,21 +54,32 @@ control-quema-hornos/
 
 ## Puesta en marcha
 
-1. Crea un proyecto de Firebase (o usa uno existente) y habilita **Firestore**.
-2. Copia tu configuración web de Firebase en `public/js/config.js`.
-3. Despliega las reglas:
+1. Crea un proyecto de Firebase (o usa uno existente) y habilita **Firestore**
+   y **Authentication** (correo/contraseña).
+2. Copia tu configuración web de Firebase en `docs/js/config.js`.
+3. Publica las reglas:
    ```bash
    firebase deploy --only firestore:rules,firestore:indexes
    ```
-4. Sirve `public/` localmente para probar:
-   ```bash
-   npx serve public
-   ```
-5. Despliega a Firebase Hosting (o GitHub Pages, cambiando solo las rutas
-   relativas si migras):
-   ```bash
-   firebase deploy --only hosting
-   ```
+4. Da de alta tu usuario en `usuarios_sistema` con `rol: "admin"` y
+   `activo: true` (el ID del documento debe ser el UID de Authentication).
+
+## Desplegar con GitHub Pages (recomendado para probar rápido)
+
+1. En GitHub, entra al repo → **Settings → Pages**
+2. En "Build and deployment": Source = **Deploy from a branch**
+3. Branch = **main**, carpeta = **/docs** → **Save**
+4. Espera 1-2 minutos; tu dashboard queda en:
+   `https://cernicalohidrocalido-spec.github.io/ladrilleras-pabellon/`
+
+Cada `git push` a `main` actualiza el sitio automáticamente.
+
+## Alternativa: Firebase Hosting
+
+```bash
+npx serve docs        # probar localmente
+firebase deploy --only hosting
+```
 
 ## Roles
 
