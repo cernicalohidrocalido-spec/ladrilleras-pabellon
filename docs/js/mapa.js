@@ -1,4 +1,4 @@
-import { calcularEstadoPermiso } from "./utils.js?v=3";
+import { calcularEstadoPermiso } from "./utils.js?v=4";
 
 let mapaInstancia = null;
 
@@ -26,7 +26,7 @@ export function agregarCapasBase(mapa) {
     .layers(
       { "Calles": calles, "Satélite": satelital },
       {},
-      { position: "topright", collapsed: false }
+      { position: "topright", collapsed: true }
     )
     .addTo(mapa);
 
