@@ -1,0 +1,30 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "permisos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "horno_id", "order": "ASCENDING" },
+        { "fieldPath": "estado", "order": "ASCENDING" },
+        { "fieldPath": "fecha_vigencia_fin", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "reportes_quema",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "resultado_verificacion", "order": "ASCENDING" },
+        { "fieldPath": "fecha_hora_reporte", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "permisos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "estado", "order": "ASCENDING" },
+        { "fieldPath": "fecha_vigencia_fin", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

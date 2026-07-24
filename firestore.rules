@@ -1,0 +1,60 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function usuario() {
+      return get(/databases/$(database)/documents/usuarios_sistema/$(request.auth.uid));
+    }
+
+    function rol() {
+      return isSignedIn() && usuario().data.activo == true
+        ? usuario().data.rol
+        : 'ninguno';
+    }
+
+    function esAdmin() {
+      return rol() == 'admin';
+    }
+
+    function esInspector() {
+      return rol() == 'admin' || rol() == 'inspector';
+    }
+
+    function puedeLeer() {
+      return rol() == 'admin' || rol() == 'inspector' || rol() == 'consulta';
+    }
+
+    match /usuarios_sistema/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || esAdmin());
+      allow write: if esAdmin();
+    }
+
+    match /hornos/{hornoId} {
+      allow read: if puedeLeer();
+      allow create, update: if esInspector();
+      allow delete: if esAdmin();
+    }
+
+    match /permisos/{permisoId} {
+      allow read: if puedeLeer();
+      allow create, update: if esInspector();
+      allow delete: if esAdmin();
+    }
+
+    match /reportes_quema/{reporteId} {
+      allow read: if puedeLeer();
+      allow create, update: if esInspector();
+      allow delete: if esAdmin();
+    }
+
+    match /alertas/{alertaId} {
+      allow read: if puedeLeer();
+      allow write: if esInspector();
+    }
+  }
+}
