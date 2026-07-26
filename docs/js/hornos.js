@@ -1,6 +1,6 @@
-import { db, collection, addDoc, getDocs, Timestamp, GeoPoint } from "./db.js?v=6";
-import { abrirModal, cerrarModal } from "./utils.js?v=6";
-import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=6";
+import { db, collection, addDoc, getDocs, Timestamp, GeoPoint } from "./db.js?v=7";
+import { abrirModal, cerrarModal } from "./utils.js?v=7";
+import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=7";
 
 const hornosCol = collection(db, "hornos");
 
@@ -83,12 +83,12 @@ function formHornoHtml() {
         </select>
       </label>
     </div>
-    <button class="btn btn-primary" id="f-guardar">Guardar horno</button>
+    <button class="btn btn-primary" id="f-guardar">💾 Guardar horno</button>
   `;
 }
 
 export function abrirFormularioHorno(onGuardado) {
-  abrirModal("Registrar horno", formHornoHtml());
+  abrirModal("🧱 Registrar horno", formHornoHtml());
 
   const inputLat = document.getElementById("f-lat");
   const inputLng = document.getElementById("f-lng");

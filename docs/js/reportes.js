@@ -1,7 +1,7 @@
-import { db, collection, addDoc, getDocs, doc, Timestamp, GeoPoint } from "./db.js?v=6";
-import { abrirModal, cerrarModal, pillHtml, formatFechaHora, distanciaMetros, calcularEstadoPermiso } from "./utils.js?v=6";
-import { listarHornos } from "./hornos.js?v=6";
-import { listarPermisos } from "./permisos.js?v=6";
+import { db, collection, addDoc, getDocs, doc, Timestamp, GeoPoint } from "./db.js?v=7";
+import { abrirModal, cerrarModal, pillHtml, formatFechaHora, distanciaMetros, calcularEstadoPermiso } from "./utils.js?v=7";
+import { listarHornos } from "./hornos.js?v=7";
+import { listarPermisos } from "./permisos.js?v=7";
 
 const reportesCol = collection(db, "reportes_quema");
 
@@ -120,13 +120,13 @@ function formReporteHtml() {
     <label>Atendido por
       <input type="text" id="f-atendido">
     </label>
-    <button class="btn btn-primary" id="f-verificar">Verificar y guardar</button>
+    <button class="btn btn-primary" id="f-verificar">🔍 Verificar y guardar</button>
     <div id="f-resultado" style="margin-top:6px;"></div>
   `;
 }
 
 export function abrirFormularioReporte(onGuardado) {
-  abrirModal("Registrar reporte de quema", formReporteHtml());
+  abrirModal("🔥 Registrar reporte de quema", formReporteHtml());
   document.getElementById("f-verificar").addEventListener("click", async () => {
     const lat = document.getElementById("f-lat").value;
     const lng = document.getElementById("f-lng").value;

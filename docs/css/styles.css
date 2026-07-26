@@ -6,9 +6,9 @@
   --text: #1F2233;
   --text-muted: #6C7080;
 
-  --navy: #2D2A6B;
-  --navy-dark: #211F52;
-  --navy-light: #4642A0;
+  --navy: #002A5C;
+  --navy-dark: #001B3D;
+  --navy-light: #0B4C8C;
 
   --vigente: #0B7A34;
   --vigente-bg: rgba(11, 122, 52, 0.09);
@@ -92,12 +92,17 @@ body {
 }
 
 .nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
-.nav-item.active { background: rgba(255,255,255,0.14); color: #fff; font-weight: 500; }
-.nav-item.active .nav-dot { background: #4CAF63; }
+.nav-item.active {
+  background: rgba(255,255,255,0.14);
+  color: #fff;
+  font-weight: 500;
+  box-shadow: inset 3px 0 0 #4CAF63;
+}
 
-.nav-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: rgba(255,255,255,0.3);
+.nav-icon {
+  font-size: 15px;
+  width: 18px;
+  text-align: center;
   flex-shrink: 0;
 }
 

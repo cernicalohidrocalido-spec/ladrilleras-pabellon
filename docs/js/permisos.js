@@ -1,6 +1,6 @@
-import { db, collection, addDoc, getDocs, doc, Timestamp } from "./db.js?v=6";
-import { abrirModal, cerrarModal, calcularEstadoPermiso, pillHtml, gaugeHtml, formatFecha } from "./utils.js?v=6";
-import { listarHornos } from "./hornos.js?v=6";
+import { db, collection, addDoc, getDocs, doc, Timestamp } from "./db.js?v=7";
+import { abrirModal, cerrarModal, calcularEstadoPermiso, pillHtml, gaugeHtml, formatFecha } from "./utils.js?v=7";
+import { listarHornos } from "./hornos.js?v=7";
 
 const permisosCol = collection(db, "permisos");
 
@@ -91,12 +91,12 @@ async function formPermisoHtml() {
     <label>Autorizado por
       <input type="text" id="f-autorizado-por" placeholder="Nombre del funcionario">
     </label>
-    <button class="btn btn-primary" id="f-guardar">Guardar permiso</button>
+    <button class="btn btn-primary" id="f-guardar">💾 Guardar permiso</button>
   `;
 }
 
 export async function abrirFormularioPermiso(onGuardado) {
-  abrirModal("Registrar trámite de permiso", await formPermisoHtml());
+  abrirModal("📋 Registrar trámite de permiso", await formPermisoHtml());
   document.getElementById("f-guardar").addEventListener("click", async () => {
     const diasSeleccionados = Array.from(document.querySelectorAll(".f-dia:checked")).map(
       (el) => el.value
