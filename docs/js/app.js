@@ -1,9 +1,9 @@
-import { listarHornos, renderTablaHornos, abrirFormularioHorno } from "./hornos.js?v=8";
-import { listarPermisos, renderTablaPermisos, abrirFormularioPermiso } from "./permisos.js?v=8";
-import { listarReportes, renderTablaReportes, abrirFormularioReporte } from "./reportes.js?v=8";
-import { pintarHornosEnMapa } from "./mapa.js?v=8";
-import { calcularEstadoPermiso, pillHtml, formatFecha } from "./utils.js?v=8";
-import { exportarHornos, exportarPermisos, exportarReportes } from "./exportar.js?v=8";
+import { listarHornos, renderTablaHornos, abrirFormularioHorno, eliminarHorno, abrirDetalleHorno } from "./hornos.js?v=10";
+import { listarPermisos, renderTablaPermisos, abrirFormularioPermiso, eliminarPermiso } from "./permisos.js?v=10";
+import { listarReportes, renderTablaReportes, abrirFormularioReporte, abrirFormularioEditarReporte, eliminarReporte } from "./reportes.js?v=10";
+import { pintarHornosEnMapa } from "./mapa.js?v=10";
+import { calcularEstadoPermiso, pillHtml, formatFecha, confirmarAccion } from "./utils.js?v=10";
+import { exportarHornos, exportarPermisos, exportarReportes } from "./exportar.js?v=10";
 
 // --- Navegación entre secciones ---
 document.querySelectorAll(".nav-item").forEach((btn) => {
@@ -188,3 +188,57 @@ document.getElementById("btn-exportar-reportes").addEventListener("click", () =>
 });
 
 window.addEventListener("cq:autenticado", cargarTodo);
+
+// --- Acciones de fila: ver / editar / eliminar (delegación de eventos) ---
+
+document.querySelector("#tabla-hornos tbody").addEventListener("click", async (e) => {
+  const btn = e.target.closest("button[data-action]");
+  if (!btn) return;
+  const horno = cacheHornos.find((h) => h.id === btn.dataset.id);
+  if (!horno) return;
+
+  if (btn.dataset.action === "editar") {
+    abrirFormularioHorno(cargarTodo, horno);
+  } else if (btn.dataset.action === "eliminar") {
+    if (confirmarAccion(`¿Eliminar el horno "${horno.nombre_referencia || "sin nombre"}"? También pierde su relación con los permisos y reportes ya guardados.`)) {
+      await eliminarHorno(horno.id);
+      cargarTodo();
+    }
+  } else if (btn.dataset.action === "ver") {
+    const permisosDelHorno = cachePermisos.filter((p) => p.horno_id?.id === horno.id);
+    const reportesDelHorno = cacheReportes.filter((r) => r.horno_id_identificado?.id === horno.id);
+    abrirDetalleHorno(horno, permisosDelHorno, reportesDelHorno);
+  }
+});
+
+document.querySelector("#tabla-permisos tbody").addEventListener("click", async (e) => {
+  const btn = e.target.closest("button[data-action]");
+  if (!btn) return;
+  const permiso = cachePermisos.find((p) => p.id === btn.dataset.id);
+  if (!permiso) return;
+
+  if (btn.dataset.action === "editar") {
+    abrirFormularioPermiso(cargarTodo, permiso);
+  } else if (btn.dataset.action === "eliminar") {
+    if (confirmarAccion(`¿Eliminar el permiso con folio "${permiso.folio || "sin folio"}"?`)) {
+      await eliminarPermiso(permiso.id);
+      cargarTodo();
+    }
+  }
+});
+
+document.querySelector("#tabla-reportes tbody").addEventListener("click", async (e) => {
+  const btn = e.target.closest("button[data-action]");
+  if (!btn) return;
+  const reporte = cacheReportes.find((r) => r.id === btn.dataset.id);
+  if (!reporte) return;
+
+  if (btn.dataset.action === "editar") {
+    abrirFormularioEditarReporte(reporte, cargarTodo);
+  } else if (btn.dataset.action === "eliminar") {
+    if (confirmarAccion("¿Eliminar este reporte de quema?")) {
+      await eliminarReporte(reporte.id);
+      cargarTodo();
+    }
+  }
+});

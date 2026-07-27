@@ -1,7 +1,7 @@
-import { db, collection, addDoc, getDocs, doc, Timestamp, GeoPoint } from "./db.js?v=8";
-import { abrirModal, cerrarModal, pillHtml, formatFechaHora, distanciaMetros, calcularEstadoPermiso } from "./utils.js?v=8";
-import { listarHornos } from "./hornos.js?v=8";
-import { listarPermisos } from "./permisos.js?v=8";
+import { db, collection, addDoc, updateDoc, deleteDoc, getDocs, doc, Timestamp, GeoPoint } from "./db.js?v=10";
+import { abrirModal, cerrarModal, pillHtml, formatFechaHora, distanciaMetros, calcularEstadoPermiso, accionesHtmlSimple } from "./utils.js?v=10";
+import { listarHornos } from "./hornos.js?v=10";
+import { listarPermisos } from "./permisos.js?v=10";
 
 const reportesCol = collection(db, "reportes_quema");
 
@@ -76,6 +76,22 @@ export async function crearReporte(data, verificacion) {
   });
 }
 
+// Edición: solo toca los campos editables (no vuelve a correr la
+// verificación geográfica, que corresponde al momento en que se recibió).
+export async function actualizarReporte(id, data) {
+  return updateDoc(doc(db, "reportes_quema", id), {
+    origen_reporte: data.origen,
+    direccion_reportada: data.direccion,
+    descripcion: data.descripcion,
+    atendido_por: data.atendidoPor,
+    seguimiento: data.seguimiento || "",
+  });
+}
+
+export async function eliminarReporte(id) {
+  return deleteDoc(doc(db, "reportes_quema", id));
+}
+
 export function renderTablaReportes(reportes, hornosById) {
   const tbody = document.querySelector("#tabla-reportes tbody");
   tbody.innerHTML = reportes
@@ -88,6 +104,7 @@ export function renderTablaReportes(reportes, hornosById) {
         <td>${r.direccion_reportada || "—"}</td>
         <td>${horno ? horno.nombre_referencia : "No identificado"}</td>
         <td>${pillHtml(r.resultado_verificacion)}</td>
+        <td>${accionesHtmlSimple(r.id)}</td>
       </tr>`;
     })
     .join("");
@@ -125,6 +142,30 @@ function formReporteHtml() {
   `;
 }
 
+function formEditarReporteHtml(reporte) {
+  return `
+    <p class="section-sub">La ubicación, fecha y resultado de verificación no cambian al editar — corresponden al momento del reporte original.</p>
+    <label>Origen del reporte
+      <select id="f-origen">
+        ${["ciudadano", "patrulla", "airepuro", "anónimo"].map((o) => `<option ${reporte.origen_reporte === o ? "selected" : ""}>${o}</option>`).join("")}
+      </select>
+    </label>
+    <label>Dirección aproximada
+      <input type="text" id="f-direccion" value="${reporte.direccion_reportada || ""}">
+    </label>
+    <label>Descripción
+      <textarea id="f-descripcion" rows="2">${reporte.descripcion || ""}</textarea>
+    </label>
+    <label>Atendido por
+      <input type="text" id="f-atendido" value="${reporte.atendido_por || ""}">
+    </label>
+    <label>Seguimiento / acción tomada
+      <textarea id="f-seguimiento" rows="2">${reporte.seguimiento || ""}</textarea>
+    </label>
+    <button class="btn btn-primary" id="f-guardar">💾 Guardar cambios</button>
+  `;
+}
+
 export function abrirFormularioReporte(onGuardado) {
   abrirModal("🔥 Registrar reporte de quema", formReporteHtml());
   document.getElementById("f-verificar").addEventListener("click", async () => {
@@ -150,5 +191,21 @@ export function abrirFormularioReporte(onGuardado) {
       cerrarModal();
       onGuardado && onGuardado();
     }, 900);
+  });
+}
+
+export function abrirFormularioEditarReporte(reporte, onGuardado) {
+  abrirModal("✏️ Editar reporte de quema", formEditarReporteHtml(reporte));
+  document.getElementById("f-guardar").addEventListener("click", async () => {
+    const data = {
+      origen: document.getElementById("f-origen").value,
+      direccion: document.getElementById("f-direccion").value,
+      descripcion: document.getElementById("f-descripcion").value,
+      atendidoPor: document.getElementById("f-atendido").value,
+      seguimiento: document.getElementById("f-seguimiento").value,
+    };
+    await actualizarReporte(reporte.id, data);
+    cerrarModal();
+    onGuardado && onGuardado();
   });
 }

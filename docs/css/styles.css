@@ -431,6 +431,54 @@ h1 {
 .capas-btn.activa { background: var(--navy); color: #fff; }
 .capas-btn:hover:not(.activa) { background: var(--surface-alt); }
 
+/* Acciones por fila (ver/editar/eliminar) */
+.row-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.row-btn {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 14px;
+  padding: 4px 7px;
+  cursor: pointer;
+  line-height: 1;
+}
+.row-btn:hover { background: var(--surface-alt); border-color: var(--border); }
+.row-btn-danger:hover { background: var(--vencido-bg); }
+
+/* Ficha de detalle (horno) */
+.detalle-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 20px;
+  margin-bottom: 6px;
+}
+.detalle-grid > div { display: flex; flex-direction: column; gap: 2px; }
+.detalle-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .03em; }
+.detalle-grid strong { font-size: 13px; color: var(--text); font-weight: 500; }
+
+.detalle-subtitulo {
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--navy-dark);
+  margin: 18px 0 8px 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.detalle-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.detalle-item:last-child { border-bottom: none; }
+
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
 /* Login */

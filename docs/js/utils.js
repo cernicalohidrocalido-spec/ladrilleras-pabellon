@@ -69,6 +69,37 @@ overlay.addEventListener("click", (e) => {
   if (e.target === overlay) cerrarModal();
 });
 
+export function confirmarAccion(mensaje) {
+  return window.confirm(mensaje);
+}
+
+// Botonera de acciones (ver / editar / eliminar) para una fila de tabla.
+export function accionesHtml(id) {
+  return `
+    <div class="row-actions">
+      <button class="row-btn" data-action="ver" data-id="${id}" title="Ver detalle">👁️</button>
+      <button class="row-btn" data-action="editar" data-id="${id}" title="Editar">✏️</button>
+      <button class="row-btn row-btn-danger" data-action="eliminar" data-id="${id}" title="Eliminar">🗑️</button>
+    </div>
+  `;
+}
+
+export function accionesHtmlSimple(id) {
+  return `
+    <div class="row-actions">
+      <button class="row-btn" data-action="editar" data-id="${id}" title="Editar">✏️</button>
+      <button class="row-btn row-btn-danger" data-action="eliminar" data-id="${id}" title="Eliminar">🗑️</button>
+    </div>
+  `;
+}
+
+// Convierte un Timestamp de Firestore a "YYYY-MM-DD" para <input type="date">
+export function toDateInputValue(ts) {
+  if (!ts) return "";
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toISOString().slice(0, 10);
+}
+
 // Distancia aproximada en metros entre dos coordenadas (Haversine)
 export function distanciaMetros(lat1, lon1, lat2, lon2) {
   const R = 6371000;
