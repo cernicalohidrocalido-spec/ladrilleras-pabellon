@@ -62,13 +62,14 @@ body {
 }
 
 .brand-mark {
-  width: 96px;
-  height: 96px;
+  width: 190px;
+  height: auto;
+  aspect-ratio: 185 / 126;
   border-radius: 14px;
   flex-shrink: 0;
   background: #fff;
   object-fit: contain;
-  padding: 8px;
+  padding: 4px;
   box-shadow: 0 4px 14px rgba(0,0,0,0.25);
 }
 
@@ -457,8 +458,9 @@ h1 {
 }
 
 .login-mark {
-  width: 56px;
-  height: 56px;
+  width: 120px;
+  height: auto;
+  aspect-ratio: 185 / 126;
   margin-bottom: 4px;
   border-radius: 10px;
   background: #fff;
