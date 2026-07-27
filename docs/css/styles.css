@@ -336,7 +336,7 @@ h1 {
   background: rgba(20,20,40,0.45);
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  z-index: 2000;
 }
 .modal-overlay.open { display: flex; }
 
@@ -430,6 +430,23 @@ h1 {
 .capas-btn + .capas-btn { border-left: 1px solid var(--border); }
 .capas-btn.activa { background: var(--navy); color: #fff; }
 .capas-btn:hover:not(.activa) { background: var(--surface-alt); }
+
+/* Popup de horno en el mapa */
+.mapa-popup { font-family: var(--font-ui); min-width: 170px; }
+.mapa-popup strong { font-size: 13px; color: var(--navy-dark); }
+.mapa-popup-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.mapa-popup-acciones { display: flex; gap: 6px; margin-top: 8px; }
+.mapa-popup-btn {
+  flex: 1;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  border: 1px solid var(--border);
+  background: var(--surface-alt);
+  border-radius: 6px;
+  padding: 5px 6px;
+  cursor: pointer;
+}
+.mapa-popup-btn:hover { background: var(--border); }
 
 /* Acciones por fila (ver/editar/eliminar) */
 .row-actions {

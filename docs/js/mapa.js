@@ -1,4 +1,4 @@
-import { calcularEstadoPermiso } from "./utils.js?v=10";
+import { calcularEstadoPermiso } from "./utils.js?v=11";
 
 // Coordenadas reales de la cabecera municipal de Pabellón de Arteaga, Ags.
 export const CENTRO_PABELLON = [22.1492, -102.2765];
@@ -65,7 +65,7 @@ export function inicializarMapa() {
   return mapaInstancia;
 }
 
-export function pintarHornosEnMapa(hornos, permisosPorHorno) {
+export function pintarHornosEnMapa(hornos, permisosPorHorno, callbacks = {}) {
   const mapa = inicializarMapa();
 
   // Limpia marcadores previos
@@ -79,6 +79,27 @@ export function pintarHornosEnMapa(hornos, permisosPorHorno) {
     const vigente = permisos.find((p) => calcularEstadoPermiso(p) !== "vencido");
     const estado = vigente ? calcularEstadoPermiso(vigente) : "vencido";
 
+    const popupEl = document.createElement("div");
+    popupEl.className = "mapa-popup";
+    popupEl.innerHTML = `
+      <strong>${h.nombre_referencia || "Horno"}</strong>
+      <div class="mapa-popup-meta">${h.propietario_nombre || ""}</div>
+      <div class="mapa-popup-meta">${h.direccion || ""}</div>
+      <div class="mapa-popup-meta">Estado: ${estado.replace("_", " ")}</div>
+      <div class="mapa-popup-acciones">
+        <button type="button" class="mapa-popup-btn" data-accion="ver">👁️ Ficha completa</button>
+        <button type="button" class="mapa-popup-btn" data-accion="editar">✏️ Editar</button>
+      </div>
+    `;
+    popupEl.querySelector('[data-accion="ver"]').addEventListener("click", () => {
+      mapa.closePopup();
+      callbacks.onVer && callbacks.onVer(h);
+    });
+    popupEl.querySelector('[data-accion="editar"]').addEventListener("click", () => {
+      mapa.closePopup();
+      callbacks.onEditar && callbacks.onEditar(h);
+    });
+
     L.circleMarker([h.ubicacion.latitude, h.ubicacion.longitude], {
       radius: 8,
       color: COLOR_ESTADO[estado],
@@ -87,9 +108,7 @@ export function pintarHornosEnMapa(hornos, permisosPorHorno) {
       weight: 2,
     })
       .addTo(mapa)
-      .bindPopup(
-        `<strong>${h.nombre_referencia || "Horno"}</strong><br>${h.direccion || ""}<br>Estado: ${estado.replace("_", " ")}`
-      );
+      .bindPopup(popupEl);
   });
 }
 

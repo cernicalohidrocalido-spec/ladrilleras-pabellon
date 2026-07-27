@@ -1,9 +1,9 @@
-import { listarHornos, renderTablaHornos, abrirFormularioHorno, eliminarHorno, abrirDetalleHorno } from "./hornos.js?v=10";
-import { listarPermisos, renderTablaPermisos, abrirFormularioPermiso, eliminarPermiso } from "./permisos.js?v=10";
-import { listarReportes, renderTablaReportes, abrirFormularioReporte, abrirFormularioEditarReporte, eliminarReporte } from "./reportes.js?v=10";
-import { pintarHornosEnMapa } from "./mapa.js?v=10";
-import { calcularEstadoPermiso, pillHtml, formatFecha, confirmarAccion } from "./utils.js?v=10";
-import { exportarHornos, exportarPermisos, exportarReportes } from "./exportar.js?v=10";
+import { listarHornos, renderTablaHornos, abrirFormularioHorno, eliminarHorno, abrirDetalleHorno } from "./hornos.js?v=11";
+import { listarPermisos, renderTablaPermisos, abrirFormularioPermiso, eliminarPermiso } from "./permisos.js?v=11";
+import { listarReportes, renderTablaReportes, abrirFormularioReporte, abrirFormularioEditarReporte, eliminarReporte } from "./reportes.js?v=11";
+import { pintarHornosEnMapa } from "./mapa.js?v=11";
+import { calcularEstadoPermiso, pillHtml, formatFecha, confirmarAccion } from "./utils.js?v=11";
+import { exportarHornos, exportarPermisos, exportarReportes } from "./exportar.js?v=11";
 
 // --- Navegación entre secciones ---
 document.querySelectorAll(".nav-item").forEach((btn) => {
@@ -103,7 +103,14 @@ function cargarMapa() {
     if (!hid) return;
     (permisosPorHorno[hid] ||= []).push(p);
   });
-  pintarHornosEnMapa(cacheHornos, permisosPorHorno);
+  pintarHornosEnMapa(cacheHornos, permisosPorHorno, {
+    onVer: (horno) => {
+      const permisosDelHorno = cachePermisos.filter((p) => p.horno_id?.id === horno.id);
+      const reportesDelHorno = cacheReportes.filter((r) => r.horno_id_identificado?.id === horno.id);
+      abrirDetalleHorno(horno, permisosDelHorno, reportesDelHorno);
+    },
+    onEditar: (horno) => abrirFormularioHorno(cargarTodo, horno),
+  });
 }
 
 // --- Buscador ---
