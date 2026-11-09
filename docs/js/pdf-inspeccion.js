@@ -11,7 +11,7 @@ import {
   formatPesosMXN,
   numeroALetrasPesos,
   SANCION_PLAZO_PAGO,
-} from "./utils.js?v=26";
+} from "./utils.js?v=27";
 
 const ETIQUETA_RESULTADO = {
   con_permiso_vigente: "Con permiso vigente",
@@ -25,6 +25,15 @@ const ETIQUETA_ID = {
   manifestacion: "Lo que manifiesta",
   otro: "Otra identificación",
 };
+
+const DIRECTOR_IMBIO = "Biól. Luis Felipe Lozano Román";
+const DIRECTOR_CARGO = "Director del Instituto Municipal de Biodiversidad y Protección Ambiental (IMBIO)";
+
+const SUSTENTO_LEGAL_SANCION = [
+  "Ley de Ingresos del Municipio de Pabellón de Arteaga, Aguascalientes, para el ejercicio fiscal 2026, en lo relativo a las infracciones ambientales tipificadas en los incisos c) y f) y a la multa de 100 a 1,000 UMA.",
+  "Atribuciones del Instituto Municipal de Biodiversidad y Protección Ambiental (IMBIO) para inspeccionar, verificar y sancionar conductas que afecten el medio ambiente en el municipio de Pabellón de Arteaga.",
+  "Valor diario de la UMA vigente al momento de cometer la infracción (INEGI), aplicado para determinar el monto en pesos de la multa.",
+];
 
 function esc(texto) {
   return String(texto ?? "")
@@ -40,6 +49,23 @@ function urlLogoInstitucional() {
   } catch {
     return "assets/logo-imbio.jpg";
   }
+}
+
+/** Cadena de seguridad determinística (verificación documental). */
+function cadenaSeguridad(partes) {
+  const base = partes.map((p) => String(p ?? "").trim().toUpperCase()).join("|");
+  let h = 2166136261;
+  for (let i = 0; i < base.length; i++) {
+    h ^= base.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  const hex = (h >>> 0).toString(16).toUpperCase().padStart(8, "0");
+  let h2 = 5381;
+  for (let i = 0; i < base.length; i++) {
+    h2 = ((h2 << 5) + h2) ^ base.charCodeAt(i);
+  }
+  const hex2 = (h2 >>> 0).toString(16).toUpperCase().padStart(8, "0");
+  return `IMBIO-${hex}-${hex2}`;
 }
 
 function estilosComunes() {
@@ -103,6 +129,38 @@ function estilosComunes() {
     .multa-box .monto { font-size: 15px; font-weight: 700; color: #002A5C; }
     .multa-box .letra { font-size: 12px; margin-top: 4px; }
     .multa-box .plazo { font-size: 11.5px; margin-top: 8px; font-weight: 600; }
+    .firmas {
+      display: grid; grid-template-columns: 1fr; gap: 14px;
+      margin: 16px 0 10px; page-break-inside: avoid;
+    }
+    .firma-box {
+      border: 1px solid #c8d6e5; border-radius: 8px; padding: 12px 14px 10px;
+      background: #fbfdff; min-height: 110px;
+    }
+    .firma-box h3 {
+      margin: 0 0 8px; font-size: 11px; text-transform: uppercase;
+      letter-spacing: .04em; color: #002A5C;
+    }
+    .firma-linea {
+      margin: 48px auto 6px; width: 78%;
+      border-bottom: 1.5px solid #334155;
+    }
+    .firma-nombre {
+      text-align: center; font-weight: 700; font-size: 12.5px; color: #12263a;
+    }
+    .firma-cargo {
+      text-align: center; font-size: 11px; color: #5a6b7d; margin-top: 2px;
+    }
+    .cadena {
+      margin-top: 10px; padding: 8px 10px;
+      border: 1px dashed #8aa0b8; border-radius: 6px;
+      background: #f7fafc; font-size: 10.5px;
+    }
+    .cadena strong {
+      font-family: ui-monospace, Consolas, monospace;
+      letter-spacing: .04em; color: #002A5C;
+    }
+    .cadena .hint { color: #5a6b7d; margin-top: 3px; font-size: 9.5px; }
     .pie {
       margin-top: 14px; padding-top: 8px; border-top: 1px solid #d5dde6;
       font-size: 9.5px; color: #5a6b7d; text-align: center;
@@ -114,7 +172,7 @@ function estilosComunes() {
     }
     @media print {
       .actions { display: none; }
-      .box, .fotos, .membrete { break-inside: avoid; }
+      .box, .fotos, .membrete, .firmas, .cadena { break-inside: avoid; }
     }
   `;
 }
@@ -179,6 +237,24 @@ function fotosCompactasHtml(fotos) {
     .join("")}</div>`;
 }
 
+function firmaBoxHtml({ titulo, nombre, cargo }) {
+  return `
+  <div class="firma-box">
+    <h3>${esc(titulo)}</h3>
+    <div class="firma-linea"></div>
+    <div class="firma-nombre">${esc(nombre || "—")}</div>
+    ${cargo ? `<div class="firma-cargo">${esc(cargo)}</div>` : ""}
+  </div>`;
+}
+
+function cadenaSeguridadHtml(cadena, folio) {
+  return `
+  <div class="cadena">
+    <div>Cadena de seguridad: <strong>${esc(cadena)}</strong></div>
+    <div class="hint">Código de integridad del documento · Folio ${esc(folio)} · IMBIO Pabellón de Arteaga. Cualquier alteración invalida esta cadena.</div>
+  </div>`;
+}
+
 function abrirVentanaPdf(html) {
   const win = window.open("", "_blank");
   if (!win) {
@@ -205,6 +281,8 @@ function datosBase(reporte) {
 /** Acta / reporte de inspección (sin sanciones). */
 export function generarPdfInspeccion(reporte, horno) {
   const { fotos, resultado, coords, folio, logo } = datosBase(reporte);
+  const inspector = (reporte.atendido_por || "").trim() || "Inspector IMBIO";
+  const fechaTxt = formatFechaHora(reporte.fecha_hora_reporte);
 
   const ids = reporte.hallazgos_checklist || [];
   const mapa = Object.fromEntries(OPCIONES_HALLAZGOS.map((o) => [o.id, o.label]));
@@ -220,6 +298,18 @@ export function generarPdfInspeccion(reporte, horno) {
     ? `<p style="margin-top:8px"><strong>Observaciones adicionales:</strong><br>${esc(obs).replace(/\n/g, "<br>")}</p>`
     : "";
 
+  const cadena = cadenaSeguridad([
+    "INSP",
+    folio,
+    fechaTxt,
+    inspector,
+    reporte.nucleo_localidad,
+    reporte.direccion_reportada,
+    coords,
+    resultado,
+    (ids || []).join(","),
+  ]);
+
   const html = `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -232,12 +322,12 @@ export function generarPdfInspeccion(reporte, horno) {
   <p class="titulo-doc">Acta / reporte de inspección de ladrillera</p>
 
   <div class="grid">
-    <div class="item"><label>Fecha y hora</label><strong>${esc(formatFechaHora(reporte.fecha_hora_reporte))}</strong></div>
+    <div class="item"><label>Fecha y hora</label><strong>${esc(fechaTxt)}</strong></div>
     <div class="item"><label>Origen</label><strong>${esc(reporte.origen_reporte || "—")}</strong></div>
     <div class="item"><label>Núcleo / localidad</label><strong>${esc(reporte.nucleo_localidad || "—")}</strong></div>
     <div class="item"><label>Dirección del predio</label><strong>${esc(reporte.direccion_reportada || "—")}</strong></div>
     <div class="item"><label>Coordenadas</label><strong>${esc(coords)}</strong></div>
-    <div class="item"><label>Inspector</label><strong>${esc(reporte.atendido_por || "—")}</strong></div>
+    <div class="item"><label>Inspector</label><strong>${esc(inspector)}</strong></div>
     <div class="item"><label>Horno identificado</label><strong>${esc(horno?.nombre_referencia || "No identificado")}</strong></div>
     <div class="item"><label>Resultado de verificación</label><strong><span class="pill">${esc(resultado)}</span></strong></div>
   </div>
@@ -264,9 +354,19 @@ export function generarPdfInspeccion(reporte, horno) {
     ${fotosCompactasHtml(fotos)}
   </div>
 
+  <section class="firmas">
+    ${firmaBoxHtml({
+      titulo: "Firma del inspector",
+      nombre: inspector,
+      cargo: "Inspector ambiental · IMBIO Pabellón de Arteaga",
+    })}
+  </section>
+
+  ${cadenaSeguridadHtml(cadena, folio)}
+
   <p class="pie">
     Acta de inspección — Control de Quema · IMBIO Pabellón de Arteaga.<br>
-    Folio ${esc(folio)} · ${esc(formatFechaHora(new Date()))}<br>
+    Folio ${esc(folio)} · Generado ${esc(formatFechaHora(new Date()))}<br>
     Este documento no constituye acta de sanción.
   </p>
 
@@ -282,6 +382,8 @@ export function generarPdfInspeccion(reporte, horno) {
 export function generarPdfSancion(reporte, horno) {
   const { fotos, coords, folio, logo } = datosBase(reporte);
   const folioSancion = reporte.folio_sancion || `SANC-${folio.replace(/^INSP-/, "")}`;
+  const inspector = (reporte.atendido_por || "").trim() || "—";
+  const fechaTxt = formatFechaHora(reporte.fecha_hora_reporte);
 
   const ids = (reporte.sancion_infracciones || []).filter((id) =>
     OPCIONES_SANCION.some((o) => o.id === id)
@@ -318,6 +420,27 @@ export function generarPdfSancion(reporte, horno) {
       : `<p style="margin-top:10px"><strong>Multa determinada / propuesta:</strong> ${esc(umasTxt)}</p>
          <p class="muted" style="margin-top:6px">${esc(SANCION_PLAZO_PAGO)}</p>`;
 
+  const sustentoHtml = `<ol style="margin:0;padding-left:18px">${SUSTENTO_LEGAL_SANCION.map(
+    (s) => `<li style="margin-bottom:4px">${esc(s)}</li>`
+  ).join("")}</ol>
+  <p style="margin-top:8px">${esc(SANCION_MULTA_TEXTO)}</p>
+  <p class="muted" style="font-size:10.5px;margin-top:6px;margin-bottom:0">
+    Fuente: https://imbio.info/normativa-vigente/lectura.html?doc=ley-ingresos-2026
+  </p>`;
+
+  const cadena = cadenaSeguridad([
+    "SANC",
+    folioSancion,
+    folio,
+    fechaTxt,
+    inspector,
+    DIRECTOR_IMBIO,
+    (ids || []).join(","),
+    umasTxt,
+    pesos,
+    reporte.responsable_nombre,
+  ]);
+
   const html = `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -332,22 +455,19 @@ export function generarPdfSancion(reporte, horno) {
   <div class="box">
     <h2>Referencia a la inspección</h2>
     <p>Folio de inspección: <strong>${esc(folio)}</strong><br>
-    Fecha de los hechos: <strong>${esc(formatFechaHora(reporte.fecha_hora_reporte))}</strong><br>
+    Fecha de los hechos: <strong>${esc(fechaTxt)}</strong><br>
     Horno / propietario: <strong>${esc(horno?.nombre_referencia || horno?.propietario_nombre || "No identificado")}</strong><br>
     Núcleo / localidad: <strong>${esc(reporte.nucleo_localidad || "—")}</strong><br>
     Dirección del predio: <strong>${esc(reporte.direccion_reportada || "—")}</strong><br>
     Coordenadas: <strong>${esc(coords)}</strong><br>
-    Inspector: <strong>${esc(reporte.atendido_por || "—")}</strong></p>
+    Inspector: <strong>${esc(inspector)}</strong></p>
   </div>
 
   ${bloqueResponsablePdf(reporte)}
 
   <div class="box">
-    <h2>Fundamento — Ley de Ingresos del Municipio (ejercicio 2026)</h2>
-    <p>${esc(SANCION_MULTA_TEXTO)}</p>
-    <p class="muted" style="font-size:10.5px;margin-top:6px;margin-bottom:0">
-      Fuente: https://imbio.info/normativa-vigente/lectura.html?doc=ley-ingresos-2026
-    </p>
+    <h2>Sustento legal</h2>
+    ${sustentoHtml}
   </div>
 
   <div class="box">
@@ -371,9 +491,19 @@ export function generarPdfSancion(reporte, horno) {
     ${fotosCompactasHtml(fotos)}
   </div>
 
+  <section class="firmas">
+    ${firmaBoxHtml({
+      titulo: "Firma del Director del IMBIO",
+      nombre: DIRECTOR_IMBIO,
+      cargo: DIRECTOR_CARGO,
+    })}
+  </section>
+
+  ${cadenaSeguridadHtml(cadena, folioSancion)}
+
   <p class="pie">
     Acta de sanción — Control de Quema · IMBIO Pabellón de Arteaga.<br>
-    Folio sanción ${esc(folioSancion)} · Inspección relacionada ${esc(folio)} · ${esc(formatFechaHora(new Date()))}<br>
+    Folio sanción ${esc(folioSancion)} · Inspección relacionada ${esc(folio)} · Generado ${esc(formatFechaHora(new Date()))}<br>
     Documento distinto e independiente del acta de inspección.
   </p>
 
