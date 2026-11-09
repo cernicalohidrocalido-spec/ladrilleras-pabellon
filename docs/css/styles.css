@@ -557,6 +557,22 @@ h1 {
 }
 .fotos-bloque { display: flex; flex-direction: column; gap: 8px; }
 .fotos-acciones { display: flex; flex-wrap: wrap; gap: 8px; }
+.sancion-bloque {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #c8d6e5;
+  border-radius: 10px;
+  background: #f7fafc;
+}
+.sancion-fund {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text);
+  font-weight: 500;
+}
 .foto-thumb { position: relative; }
 .foto-quitar {
   position: absolute;

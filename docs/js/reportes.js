@@ -1,15 +1,16 @@
 ﻿import {
   db, storage, collection, addDoc, updateDoc, deleteDoc, getDocs, doc,
   Timestamp, GeoPoint, ref, uploadBytes, getDownloadURL,
-} from "./db.js?v=22";
+} from "./db.js?v=23";
 import {
   abrirModal, cerrarModal, pillHtml, formatFechaHora, distanciaMetros,
   calcularEstadoPermiso, accionesHtmlReporte, OPCIONES_HALLAZGOS,
-} from "./utils.js?v=22";
-import { listarHornos } from "./hornos.js?v=22";
-import { listarPermisos } from "./permisos.js?v=22";
-import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=22";
-import { generarPdfInspeccion } from "./pdf-inspeccion.js?v=22";
+  OPCIONES_SANCION, SANCION_MULTA_TEXTO,
+} from "./utils.js?v=23";
+import { listarHornos } from "./hornos.js?v=23";
+import { listarPermisos } from "./permisos.js?v=23";
+import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=23";
+import { generarPdfInspeccion } from "./pdf-inspeccion.js?v=23";
 
 const reportesCol = collection(db, "reportes_quema");
 const RADIO_MATCH_METROS = 150;
@@ -38,6 +39,33 @@ function checklistHallazgosHtml(seleccionados = []) {
           <span>${o.label}</span>
         </label>`
       ).join("")}
+    </div>
+  `;
+}
+
+function checklistSancionHtml(seleccionados = [], umas = "", obs = "") {
+  const set = new Set(seleccionados || []);
+  return `
+    <div class="sancion-bloque">
+      <div class="hallazgos-label">Sanción (Ley de Ingresos 2026)</div>
+      <p class="sancion-fund">${SANCION_MULTA_TEXTO}</p>
+      <p class="geo-hint">Marca la(s) infracción(es) aplicable(s). Para quema en baldíos/áreas verdes suele aplicar el inciso <strong>j)</strong>; emisiones contaminantes el <strong>g)</strong>.</p>
+      <div class="hallazgos-checklist" role="group" aria-label="Infracciones">
+        ${OPCIONES_SANCION.map(
+          (o) => `<label class="check-row">
+            <input type="checkbox" class="f-sancion" value="${o.id}" ${set.has(o.id) ? "checked" : ""}>
+            <span>${o.label}</span>
+          </label>`
+        ).join("")}
+      </div>
+      <div class="field-row">
+        <label>Multa propuesta (UMA)
+          <input type="number" id="f-sancion-umas" min="100" max="1000" step="1" placeholder="100–1000" value="${umas || ""}">
+        </label>
+      </div>
+      <label>Observaciones de la sanción
+        <textarea id="f-sancion-obs" rows="2" placeholder="Fundamento, agravantes, plazos…">${obs || ""}</textarea>
+      </label>
     </div>
   `;
 }
@@ -107,19 +135,37 @@ export async function verificarReporte({ lat, lng, fechaHora }) {
   return { resultado: "con_permiso_vigente", horno: hornoMasCercano, permiso: permisoVigente };
 }
 
-async function comprimirImagen(file, maxAncho = 1280, calidad = 0.82) {
-  const bitmap = await createImageBitmap(file);
-  const escala = Math.min(1, maxAncho / bitmap.width);
-  const w = Math.round(bitmap.width * escala);
-  const h = Math.round(bitmap.height * escala);
-  const canvas = document.createElement("canvas");
-  canvas.width = w;
-  canvas.height = h;
-  const ctx = canvas.getContext("2d");
-  ctx.drawImage(bitmap, 0, 0, w, h);
-  bitmap.close?.();
-  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", calidad));
-  return blob || file;
+function conTimeout(promesa, ms, mensaje) {
+  return Promise.race([
+    promesa,
+    new Promise((_, reject) => {
+      setTimeout(() => reject(new Error(mensaje)), ms);
+    }),
+  ]);
+}
+
+async function comprimirImagen(file, maxAncho = 1024, calidad = 0.72) {
+  try {
+    let bitmap;
+    if (typeof createImageBitmap === "function") {
+      bitmap = await conTimeout(createImageBitmap(file), 8000, "Compresión de imagen agotó el tiempo");
+    } else {
+      throw new Error("createImageBitmap no disponible");
+    }
+    const escala = Math.min(1, maxAncho / bitmap.width);
+    const w = Math.max(1, Math.round(bitmap.width * escala));
+    const h = Math.max(1, Math.round(bitmap.height * escala));
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    canvas.getContext("2d").drawImage(bitmap, 0, 0, w, h);
+    bitmap.close?.();
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", calidad));
+    return blob || file;
+  } catch (err) {
+    console.warn("Compresión falló, se usa archivo original:", err?.message || err);
+    return file;
+  }
 }
 
 function blobADataUrl(blob) {
@@ -133,76 +179,100 @@ function blobADataUrl(blob) {
 
 async function subirFotosReporte(reporteId, archivos) {
   const subidas = [];
+  const avisos = [];
   for (let i = 0; i < archivos.length; i += 1) {
     const file = archivos[i];
-    const blob = await comprimirImagen(file);
     const nombre = `foto_${Date.now()}_${i}.jpg`;
     try {
-      const storageRef = ref(storage, `reportes_quema/${reporteId}/${nombre}`);
-      await uploadBytes(storageRef, blob, { contentType: "image/jpeg" });
-      const url = await getDownloadURL(storageRef);
-      subidas.push({ url, nombre: file.name || nombre, contentType: "image/jpeg", origen: "storage" });
+      const blob = await comprimirImagen(file, 1024, 0.7);
+      try {
+        const storageRef = ref(storage, `reportes_quema/${reporteId}/${nombre}`);
+        await conTimeout(
+          uploadBytes(storageRef, blob, { contentType: "image/jpeg" }),
+          10000,
+          "Storage no respondió a tiempo"
+        );
+        const url = await conTimeout(getDownloadURL(storageRef), 8000, "No se obtuvo URL de la foto");
+        subidas.push({ url, nombre: file.name || nombre, contentType: "image/jpeg", origen: "storage" });
+      } catch (errStorage) {
+        // Miniatura ligera para no bloquear ni reventar el documento de Firestore.
+        console.warn("Storage no disponible:", errStorage?.message || errStorage);
+        const mini = await comprimirImagen(file, 640, 0.55);
+        const dataUrl = await blobADataUrl(mini);
+        if (typeof dataUrl === "string" && dataUrl.length < 450000) {
+          subidas.push({ url: dataUrl, nombre: file.name || nombre, contentType: "image/jpeg", origen: "embebida" });
+        } else {
+          avisos.push(file.name || nombre);
+        }
+      }
     } catch (err) {
-      // Si Storage aún no está habilitado en el proyecto, guarda miniatura embebida.
-      console.warn("Storage no disponible, guardando foto embebida:", err?.message || err);
-      const dataUrl = await blobADataUrl(blob);
-      subidas.push({ url: dataUrl, nombre: file.name || nombre, contentType: "image/jpeg", origen: "embebida" });
+      console.warn("Foto omitida:", err?.message || err);
+      avisos.push(file.name || `foto ${i + 1}`);
     }
   }
-  return subidas;
+  return { fotos: subidas, avisos };
+}
+
+function payloadBaseReporte(data, verificacion) {
+  return {
+    origen_reporte: data.origen,
+    direccion_reportada: data.direccion,
+    nucleo_localidad: data.nucleo_localidad || "",
+    descripcion: data.descripcion,
+    hallazgos_checklist: data.hallazgos_checklist || [],
+    observaciones_adicionales: data.observaciones_adicionales || "",
+    hallazgos: textoHallazgosParaPdf({
+      hallazgos_checklist: data.hallazgos_checklist,
+      observaciones_adicionales: data.observaciones_adicionales,
+    }),
+    sancion_infracciones: data.sancion_infracciones || [],
+    sancion_umas: data.sancion_umas || "",
+    sancion_observaciones: data.sancion_observaciones || "",
+    atendido_por: data.atendidoPor,
+    seguimiento: data.seguimiento || "",
+  };
 }
 
 export async function crearReporte(data, verificacion, archivosFoto = []) {
   const folio = data.folio || generarFolioInspeccion(data.fechaHora || new Date());
+  // Primero guarda el reporte (sin bloquear por fotos).
   const docRef = await addDoc(reportesCol, {
     folio,
     fecha_hora_reporte: Timestamp.fromDate(data.fechaHora),
-    origen_reporte: data.origen,
     ubicacion_reportada: new GeoPoint(Number(data.lat), Number(data.lng)),
-    direccion_reportada: data.direccion,
-    nucleo_localidad: data.nucleo_localidad || "",
-    descripcion: data.descripcion,
-    hallazgos_checklist: data.hallazgos_checklist || [],
-    observaciones_adicionales: data.observaciones_adicionales || "",
-    hallazgos: textoHallazgosParaPdf({
-      hallazgos_checklist: data.hallazgos_checklist,
-      observaciones_adicionales: data.observaciones_adicionales,
-    }),
     horno_id_identificado: verificacion.horno ? doc(db, "hornos", verificacion.horno.id) : null,
     resultado_verificacion: verificacion.resultado,
     permiso_id_relacionado: verificacion.permiso ? doc(db, "permisos", verificacion.permiso.id) : null,
-    atendido_por: data.atendidoPor,
-    seguimiento: data.seguimiento || "",
     fotos: [],
     origen_ubicacion: data.origen_ubicacion || "manual",
+    ...payloadBaseReporte(data, verificacion),
   });
 
+  let fotos = [];
+  let avisos = [];
   if (archivosFoto.length) {
-    const fotos = await subirFotosReporte(docRef.id, archivosFoto);
-    await updateDoc(docRef, { fotos });
-    return { id: docRef.id, folio, fotos };
+    try {
+      const res = await subirFotosReporte(docRef.id, archivosFoto);
+      fotos = res.fotos;
+      avisos = res.avisos;
+      if (fotos.length) await updateDoc(docRef, { fotos });
+    } catch (err) {
+      console.warn("No se pudieron adjuntar fotos, el reporte sí se guardó:", err?.message || err);
+      avisos.push("todas");
+    }
   }
-  return { id: docRef.id, folio, fotos: [] };
+  return { id: docRef.id, folio, fotos, avisos };
 }
 
 export async function actualizarReporte(id, data, archivosFoto = [], fotosExistentes = []) {
-  const payload = {
-    origen_reporte: data.origen,
-    direccion_reportada: data.direccion,
-    nucleo_localidad: data.nucleo_localidad || "",
-    descripcion: data.descripcion,
-    hallazgos_checklist: data.hallazgos_checklist || [],
-    observaciones_adicionales: data.observaciones_adicionales || "",
-    hallazgos: textoHallazgosParaPdf({
-      hallazgos_checklist: data.hallazgos_checklist,
-      observaciones_adicionales: data.observaciones_adicionales,
-    }),
-    atendido_por: data.atendidoPor,
-    seguimiento: data.seguimiento || "",
-  };
+  const payload = { ...payloadBaseReporte(data) };
   if (archivosFoto.length) {
-    const nuevas = await subirFotosReporte(id, archivosFoto);
-    payload.fotos = [...fotosExistentes, ...nuevas].slice(0, MAX_FOTOS);
+    try {
+      const { fotos: nuevas } = await subirFotosReporte(id, archivosFoto);
+      payload.fotos = [...fotosExistentes, ...nuevas].slice(0, MAX_FOTOS);
+    } catch (err) {
+      console.warn("Actualización sin nuevas fotos:", err?.message || err);
+    }
   }
   return updateDoc(doc(db, "reportes_quema", id), payload);
 }
@@ -302,6 +372,12 @@ function formInspeccionHtml(reporte) {
       <label>Seguimiento / acción tomada
         <textarea id="f-seguimiento" rows="2">${reporte?.seguimiento || ""}</textarea>
       </label>
+
+      ${checklistSancionHtml(
+        reporte?.sancion_infracciones || [],
+        reporte?.sancion_umas || "",
+        reporte?.sancion_observaciones || ""
+      )}
 
       <div class="fotos-bloque">
         <div class="hallazgos-label">Fotografías de la inspección (máx. ${MAX_FOTOS})</div>
@@ -458,6 +534,9 @@ function leerCamposFormulario() {
   const hallazgos_checklist = Array.from(document.querySelectorAll(".f-hallazgo:checked")).map(
     (el) => el.value
   );
+  const sancion_infracciones = Array.from(document.querySelectorAll(".f-sancion:checked")).map(
+    (el) => el.value
+  );
   return {
     origen: document.getElementById("f-origen").value,
     nucleo_localidad: document.getElementById("f-nucleo").value.trim(),
@@ -467,6 +546,9 @@ function leerCamposFormulario() {
     descripcion: document.getElementById("f-descripcion").value.trim(),
     hallazgos_checklist,
     observaciones_adicionales: document.getElementById("f-observaciones").value.trim(),
+    sancion_infracciones,
+    sancion_umas: document.getElementById("f-sancion-umas")?.value || "",
+    sancion_observaciones: document.getElementById("f-sancion-obs")?.value.trim() || "",
     atendidoPor: document.getElementById("f-atendido").value.trim(),
     seguimiento: document.getElementById("f-seguimiento").value.trim(),
   };
@@ -498,7 +580,7 @@ export function abrirFormularioReporte(onGuardado) {
       document.getElementById("f-resultado").innerHTML =
         `Resultado: ${pillHtml(verificacion.resultado)}`;
 
-      const { id, fotos } = await crearReporte(
+      const { id, fotos, avisos } = await crearReporte(
         {
           ...campos,
           folio,
@@ -521,14 +603,22 @@ export function abrirFormularioReporte(onGuardado) {
         hallazgos_checklist: campos.hallazgos_checklist,
         observaciones_adicionales: campos.observaciones_adicionales,
         hallazgos: textoHallazgosParaPdf(campos),
+        sancion_infracciones: campos.sancion_infracciones,
+        sancion_umas: campos.sancion_umas,
+        sancion_observaciones: campos.sancion_observaciones,
         atendido_por: campos.atendidoPor,
         seguimiento: campos.seguimiento,
         resultado_verificacion: verificacion.resultado,
         fotos,
       };
 
+      const avisoFotos = avisos?.length
+        ? `<p class="geo-hint">Aviso: algunas fotos no se pudieron almacenar (${avisos.length}). El reporte sí quedó guardado.</p>`
+        : "";
+
       document.getElementById("f-resultado").innerHTML = `
         <strong>Folio ${folio}</strong> · Resultado: ${pillHtml(verificacion.resultado)}
+        ${avisoFotos}
         <div class="form-acciones-fila" style="margin-top:10px">
           <button type="button" class="btn btn-secondary" id="f-pdf-ahora">📄 Generar PDF de inspección</button>
         </div>`;
@@ -539,10 +629,11 @@ export function abrirFormularioReporte(onGuardado) {
       setTimeout(() => {
         cerrarModal();
         onGuardado && onGuardado();
-      }, 1600);
+      }, 1800);
     } catch (err) {
       console.error(err);
       window.alert("No se pudo guardar el reporte: " + (err.message || err));
+    } finally {
       btn.disabled = false;
       btn.textContent = "🔍 Verificar y guardar";
     }

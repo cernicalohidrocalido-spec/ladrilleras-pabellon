@@ -11,6 +11,30 @@ export const OPCIONES_HALLAZGOS = [
   { id: "cumple_condiciones", label: "Cumple las condiciones del permiso" },
 ];
 
+/**
+ * Infracciones ambientales (Ley de Ingresos del Municipio de Pabellón de Arteaga,
+ * ejercicio 2026). Multa: 100 a 1,000 UMA.
+ * Fuente: https://imbio.info/normativa-vigente/lectura.html?doc=ley-ingresos-2026
+ */
+export const OPCIONES_SANCION = [
+  { id: "a", label: "a) Generar residuos sólidos domésticos sin apegarse a las disposiciones del Ayuntamiento." },
+  { id: "b", label: "b) Arrojar basura desde vehículos automotores a la vía pública." },
+  { id: "c", label: "c) Criar, engordar o producir animales en zona urbana sin autorización." },
+  { id: "d", label: "d) Generar malos olores o fauna nociva por falta de higiene en la producción animal." },
+  { id: "e", label: "e) Descargar desechos de producción animal al suelo, zanjas, canales, barrancas, cuerpos de agua o drenaje municipal." },
+  { id: "f", label: "f) No cumplir con las medidas de ahorro de agua potable." },
+  { id: "g", label: "g) Generar emisiones contaminantes (ruido, vibraciones, energía térmica, lumínica o visual) que excedan los límites de NOM, normas estatales o criterios ambientales." },
+  { id: "h", label: "h) Depositar residuos vegetales del mantenimiento de áreas verdes dentro o junto a contenedores de residuos sólidos municipales." },
+  { id: "i", label: "i) Podar, talar o trasplantar árboles en áreas públicas o privadas sin autorización previa del IMBIO." },
+  { id: "j", label: "j) Utilizar el fuego para el control de malezas o limpieza de terrenos en áreas verdes o baldíos sin autorización." },
+  { id: "k", label: "k) Realizar actividades que afecten significativamente la calidad del suelo sin aplicar medidas de conservación o restauración dictadas por el IMBIO." },
+  { id: "l", label: "l) Descargar aguas residuales al drenaje municipal sin registro o licencia ambiental vigente." },
+  { id: "m", label: "m) Transportar materiales pétreos, tierra o de construcción en contenedores/plataformas abiertas que permitan dispersión de partículas, malos olores o escurrimientos." },
+];
+
+export const SANCION_MULTA_TEXTO =
+  "Se sancionará con multa de 100 a 1,000 UMA (Unidad de Medida y Actualización), a su valor vigente al momento de cometer la infracción, conforme a la Ley de Ingresos del Municipio de Pabellón de Arteaga, ejercicio fiscal 2026.";
+
 // --- Cálculo de estado de un permiso a partir de sus fechas ---
 // Devuelve 'vigente' | 'por_vencer' | 'vencido'
 export function calcularEstadoPermiso(permiso, ahora = new Date()) {

@@ -1,4 +1,6 @@
-import { formatFechaHora, OPCIONES_HALLAZGOS } from "./utils.js?v=22";
+import {
+  formatFechaHora, OPCIONES_HALLAZGOS, OPCIONES_SANCION, SANCION_MULTA_TEXTO,
+} from "./utils.js?v=23";
 
 const ETIQUETA_RESULTADO = {
   con_permiso_vigente: "Con permiso vigente",
@@ -114,6 +116,17 @@ export function generarPdfInspeccion(reporte, horno) {
     figcaption { font-size: 11px; color: #5a6b7d; margin-top: 4px; }
     .muted { color: #5a6b7d; }
     .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #eef3f8; font-weight: 600; }
+    .anexo { page-break-before: always; }
+    .anexo h2 {
+      font-size: 14px; color: #002A5C; text-transform: uppercase;
+      border-bottom: 2px solid #002A5C; padding-bottom: 6px; margin: 0 0 14px;
+    }
+    .anexo-fotos { display: grid; grid-template-columns: 1fr; gap: 18px; }
+    .anexo-fotos figure { break-inside: avoid; }
+    .anexo-fotos img {
+      width: 100%; max-height: 420px; object-fit: contain;
+      border: 1px solid #d5dde6; border-radius: 6px; background: #f8fafc;
+    }
     .pie {
       margin-top: 22px; padding-top: 10px; border-top: 1px solid #d5dde6;
       font-size: 10px; color: #5a6b7d; text-align: center;
@@ -171,9 +184,41 @@ export function generarPdfInspeccion(reporte, horno) {
   </div>
 
   <div class="box">
-    <h2>Evidencia fotográfica</h2>
+    <h2>Sanción — Ley de Ingresos del Municipio (ejercicio 2026)</h2>
+    <p class="muted" style="margin-top:0">${esc(SANCION_MULTA_TEXTO)}</p>
+    ${(() => {
+      const ids = reporte.sancion_infracciones || [];
+      const mapa = Object.fromEntries(OPCIONES_SANCION.map((o) => [o.id, o.label]));
+      if (!ids.length) return `<p class="muted">Sin infracciones marcadas en esta inspección.</p>`;
+      return `<ul>${ids.map((id) => `<li>${esc(mapa[id] || id)}</li>`).join("")}</ul>
+        <p><strong>Multa propuesta:</strong> ${esc(reporte.sancion_umas ? `${reporte.sancion_umas} UMA` : "Por determinar (100 a 1,000 UMA)")}</p>
+        ${reporte.sancion_observaciones ? `<p><strong>Observaciones:</strong><br>${esc(reporte.sancion_observaciones).replace(/\n/g, "<br>")}</p>` : ""}`;
+    })()}
+    <p class="muted" style="font-size:10px;margin-bottom:0">
+      Consulta: https://imbio.info/normativa-vigente/lectura.html?doc=ley-ingresos-2026
+    </p>
+  </div>
+
+  <div class="box">
+    <h2>Evidencia fotográfica (resumen)</h2>
     ${fotosHtml.replace(/<img /g, '<img class="evidencia" ')}
   </div>
+
+  <section class="anexo">
+    <h2>Anexo fotográfico — Folio ${esc(folio)}</h2>
+    ${
+      fotos.length
+        ? `<div class="anexo-fotos">${fotos
+            .map(
+              (f, i) => `<figure>
+            <img src="${esc(f.url)}" alt="Anexo ${i + 1}">
+            <figcaption>Anexo ${i + 1}${f.nombre ? ` — ${esc(f.nombre)}` : ""} · Evidencia de inspección</figcaption>
+          </figure>`
+            )
+            .join("")}</div>`
+        : `<p class="muted">No se adjuntaron fotografías a este reporte.</p>`
+    }
+  </section>
 
   <p class="pie">
     Documento generado por el sistema Control de Quema — IMBIO Pabellón de Arteaga.<br>
@@ -183,7 +228,7 @@ export function generarPdfInspeccion(reporte, horno) {
   <div class="actions">
     <button onclick="window.print()">Imprimir / Guardar PDF</button>
   </div>
-  <script>window.addEventListener("load", () => setTimeout(() => window.print(), 500));</script>
+  <script>window.addEventListener("load", () => setTimeout(() => window.print(), 600));</script>
 </body>
 </html>`;
 

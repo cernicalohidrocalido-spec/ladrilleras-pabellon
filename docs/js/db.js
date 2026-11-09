@@ -10,7 +10,7 @@ import {
 import {
   getStorage, ref, uploadBytes, getDownloadURL
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
-import { firebaseConfig } from "./config.js?v=22";
+import { firebaseConfig } from "./config.js?v=23";
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
