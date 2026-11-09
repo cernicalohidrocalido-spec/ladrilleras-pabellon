@@ -1,6 +1,6 @@
-﻿import { db, collection, doc, addDoc, updateDoc, deleteDoc, getDocs, Timestamp } from "./db.js?v=13";
-import { abrirModal, cerrarModal, calcularEstadoPermiso, pillHtml, gaugeHtml, formatFecha, accionesHtmlSimple, toDateInputValue, toMillis, fechaRegistroPermiso } from "./utils.js?v=13";
-import { listarHornos } from "./hornos.js?v=13";
+﻿import { db, collection, doc, addDoc, updateDoc, deleteDoc, getDocs, Timestamp } from "./db.js?v=14";
+import { abrirModal, cerrarModal, calcularEstadoPermiso, pillHtml, gaugeHtml, formatFecha, accionesHtmlSimple, toDateInputValue, toMillis, fechaRegistroPermiso } from "./utils.js?v=14";
+import { listarHornos } from "./hornos.js?v=14";
 
 const permisosCol = collection(db, "permisos");
 
@@ -66,7 +66,7 @@ export async function eliminarPermiso(id) {
 export function renderTablaPermisos(permisos, hornosById) {
   const tbody = document.querySelector("#tabla-permisos tbody");
   if (!permisos.length) {
-    tbody.innerHTML = `<tr><td colspan="7" style="color:var(--text-muted);text-align:center;padding:24px">Sin permisos registrados.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" style="color:var(--text-muted);text-align:center;padding:24px">Sin permisos registrados.</td></tr>`;
     return;
   }
   tbody.innerHTML = permisos
@@ -78,6 +78,7 @@ export function renderTablaPermisos(permisos, hornosById) {
       <tr>
         <td style="font-family:var(--font-mono)">${p.folio || "—"}</td>
         <td>${horno.nombre_referencia || "—"}</td>
+        <td>${horno.direccion || "—"}</td>
         <td data-sort-value="${toMillis(registro)}">${formatFecha(registro)}</td>
         <td>${formatFecha(p.fecha_vigencia_inicio)} – ${formatFecha(p.fecha_vigencia_fin)}</td>
         <td>${(p.dias_autorizados || []).join(", ") || "—"}</td>
