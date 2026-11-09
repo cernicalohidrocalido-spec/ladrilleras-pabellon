@@ -107,6 +107,16 @@ export function accionesHtmlSimple(id) {
   `;
 }
 
+export function accionesHtmlReporte(id) {
+  return `
+    <div class="row-actions">
+      <button class="row-btn" data-action="pdf" data-id="${id}" title="Generar PDF de inspección">📄</button>
+      <button class="row-btn" data-action="editar" data-id="${id}" title="Editar">✏️</button>
+      <button class="row-btn row-btn-danger" data-action="eliminar" data-id="${id}" title="Eliminar">🗑️</button>
+    </div>
+  `;
+}
+
 // Convierte un Timestamp de Firestore a "YYYY-MM-DD" para <input type="date">
 export function toDateInputValue(ts) {
   if (!ts) return "";

@@ -1,9 +1,9 @@
-﻿import { listarHornos, renderTablaHornos, abrirFormularioHorno, eliminarHorno, abrirDetalleHorno } from "./hornos.js?v=16";
-import { listarPermisos, renderTablaPermisos, abrirFormularioPermiso, eliminarPermiso, ordenarPermisos } from "./permisos.js?v=16";
-import { listarReportes, renderTablaReportes, abrirFormularioReporte, abrirFormularioEditarReporte, eliminarReporte } from "./reportes.js?v=16";
-import { pintarHornosEnMapa, conectarFiltrosMapa, enfocarHornoEnMapa } from "./mapa.js?v=16";
-import { calcularEstadoPermiso, pillHtml, formatFecha, confirmarAccion } from "./utils.js?v=16";
-import { exportarHornos, exportarPermisos, exportarReportes } from "./exportar.js?v=16";
+﻿import { listarHornos, renderTablaHornos, abrirFormularioHorno, eliminarHorno, abrirDetalleHorno } from "./hornos.js?v=17";
+import { listarPermisos, renderTablaPermisos, abrirFormularioPermiso, eliminarPermiso, ordenarPermisos } from "./permisos.js?v=17";
+import { listarReportes, renderTablaReportes, abrirFormularioReporte, abrirFormularioEditarReporte, eliminarReporte, generarPdfInspeccion } from "./reportes.js?v=17";
+import { pintarHornosEnMapa, conectarFiltrosMapa, enfocarHornoEnMapa } from "./mapa.js?v=17";
+import { calcularEstadoPermiso, pillHtml, formatFecha, confirmarAccion } from "./utils.js?v=17";
+import { exportarHornos, exportarPermisos, exportarReportes } from "./exportar.js?v=17";
 
 let sortPermisos = { campo: "registro", dir: "desc" };
 
@@ -286,9 +286,12 @@ document.querySelector("#tabla-reportes tbody").addEventListener("click", async 
   if (!btn) return;
   const reporte = cacheReportes.find((r) => r.id === btn.dataset.id);
   if (!reporte) return;
+  const horno = cacheHornos.find((h) => h.id === reporte.horno_id_identificado?.id);
 
-  if (btn.dataset.action === "editar") {
-    abrirFormularioEditarReporte(reporte, cargarTodo);
+  if (btn.dataset.action === "pdf") {
+    generarPdfInspeccion(reporte, horno);
+  } else if (btn.dataset.action === "editar") {
+    abrirFormularioEditarReporte(reporte, cargarTodo, horno);
   } else if (btn.dataset.action === "eliminar") {
     if (confirmarAccion("¿Eliminar este reporte de quema?")) {
       await eliminarReporte(reporte.id);

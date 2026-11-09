@@ -1,4 +1,4 @@
-﻿import { calcularEstadoPermiso, formatFecha, formatFechaHora } from "./utils.js?v=16";
+﻿import { calcularEstadoPermiso, formatFecha, formatFechaHora } from "./utils.js?v=17";
 
 const ETIQUETA_ESTADO = {
   vigente: "Vigente",
@@ -65,12 +65,15 @@ export function exportarReportes(reportes, hornosById) {
     return {
       "Fecha y hora": formatFechaHora(r.fecha_hora_reporte),
       "Origen": r.origen_reporte || "",
+      "Núcleo / localidad": r.nucleo_localidad || "",
       "Dirección reportada": r.direccion_reportada || "",
       "Horno identificado": horno ? horno.nombre_referencia : "No identificado",
       "Resultado": ETIQUETA_RESULTADO[r.resultado_verificacion] || r.resultado_verificacion,
       "Descripción": r.descripcion || "",
+      "Hallazgos": r.hallazgos || "",
       "Atendido por": r.atendido_por || "",
       "Seguimiento": r.seguimiento || "",
+      "Fotos": Array.isArray(r.fotos) ? r.fotos.length : 0,
     };
   });
   descargarHoja(filas, "Reportes", `reportes_quema_${Date.now()}.xlsx`);
