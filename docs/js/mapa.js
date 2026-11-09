@@ -1,6 +1,6 @@
-import { calcularEstadoPermiso, formatFecha } from "./utils.js?v=25";
+import { calcularEstadoPermiso, formatFecha } from "./utils.js?v=26";
 
-// Coordenadas reales de la cabecera municipal de PabellÛn de Arteaga, Ags.
+// Coordenadas reales de la cabecera municipal de Pabell√≥n de Arteaga, Ags.
 export const CENTRO_PABELLON = [22.1492, -102.2765];
 
 let mapaInstancia = null;
@@ -21,8 +21,8 @@ const ETIQUETA_ESTADO = {
   vencido: "Vencido / sin permiso",
 };
 
-// Crea (sin aÒadir a˙n) las dos capas base. No usa ning˙n control flotante
-// de Leaflet ó el toggle se maneja con botones normales de HTML, fuera del
+// Crea (sin a√±adir a√∫n) las dos capas base. No usa ning√∫n control flotante
+// de Leaflet ‚Äî el toggle se maneja con botones normales de HTML, fuera del
 // mapa, para que nunca puedan interferir con el clic o el arrastre del mapa.
 export function crearCapasBase() {
   const calles = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -33,7 +33,7 @@ export function crearCapasBase() {
   const satelital = L.tileLayer(
     "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
     {
-      attribution: "Tiles &copy; Esri ó Source: Esri, Maxar, Earthstar Geographics",
+      attribution: "Tiles &copy; Esri ‚Äî Source: Esri, Maxar, Earthstar Geographics",
       maxNativeZoom: 18,
       maxZoom: 19,
     }
@@ -86,20 +86,20 @@ function estadoHorno(permisos) {
 }
 
 function tooltipHtml(horno, estado, permiso) {
-  const dias = (permiso?.dias_autorizados || []).join(", ") || "ó";
+  const dias = (permiso?.dias_autorizados || []).join(", ") || "‚Äî";
   const horario = permiso?.horario_autorizado
-    ? `${permiso.horario_autorizado.inicio || "ó"} ñ ${permiso.horario_autorizado.fin || "ó"}`
-    : "ó";
+    ? `${permiso.horario_autorizado.inicio || "‚Äî"} ‚Äì ${permiso.horario_autorizado.fin || "‚Äî"}`
+    : "‚Äî";
   return `
     <div class="mapa-tooltip">
       <strong>${horno.nombre_referencia || "Horno"}</strong>
-      <div><span>Propietario</span>${horno.propietario_nombre || "ó"}</div>
-      <div><span>DirecciÛn</span>${horno.direccion || "ó"}</div>
-      <div><span>Combustible</span>${horno.combustible_habitual || permiso?.combustible_autorizado || "ó"}</div>
+      <div><span>Propietario</span>${horno.propietario_nombre || "‚Äî"}</div>
+      <div><span>Direcci√≥n</span>${horno.direccion || "‚Äî"}</div>
+      <div><span>Combustible</span>${horno.combustible_habitual || permiso?.combustible_autorizado || "‚Äî"}</div>
       <div><span>Estado</span>${ETIQUETA_ESTADO[estado] || estado}</div>
       <div><span>Folio</span>${permiso?.folio || "Sin permiso"}</div>
-      <div><span>Vigencia</span>${permiso ? `${formatFecha(permiso.fecha_vigencia_inicio)} ñ ${formatFecha(permiso.fecha_vigencia_fin)}` : "ó"}</div>
-      <div><span>DÌas</span>${dias}</div>
+      <div><span>Vigencia</span>${permiso ? `${formatFecha(permiso.fecha_vigencia_inicio)} ‚Äì ${formatFecha(permiso.fecha_vigencia_fin)}` : "‚Äî"}</div>
+      <div><span>D√≠as</span>${dias}</div>
       <div><span>Horario</span>${horario}</div>
     </div>
   `;
@@ -143,8 +143,8 @@ export function pintarHornosEnMapa(hornos, permisosPorHorno, callbacks = {}) {
       <div class="mapa-popup-meta">Estado: ${ETIQUETA_ESTADO[estado] || estado}</div>
       <div class="mapa-popup-meta">Folio: ${permiso?.folio || "Sin permiso"}</div>
       <div class="mapa-popup-acciones">
-        <button type="button" class="mapa-popup-btn" data-accion="ver">??? Ficha completa</button>
-        <button type="button" class="mapa-popup-btn" data-accion="editar">?? Editar</button>
+        <button type="button" class="mapa-popup-btn" data-accion="ver">üëÅÔ∏è Ficha completa</button>
+        <button type="button" class="mapa-popup-btn" data-accion="editar">‚úèÔ∏è Editar</button>
       </div>
     `;
     popupEl.querySelector('[data-accion="ver"]').addEventListener("click", () => {
@@ -189,7 +189,7 @@ export function pintarHornosEnMapa(hornos, permisosPorHorno, callbacks = {}) {
   }
 }
 
-/** Asegura que el filtro del estado del horno estÈ activo y centra el mapa en Èl. */
+/** Asegura que el filtro del estado del horno est√© activo y centra el mapa en √©l. */
 export function enfocarHornoEnMapa(hornoId) {
   const mapa = inicializarMapa();
   const horno = cacheMapa.hornos.find((h) => h.id === hornoId);
@@ -232,7 +232,7 @@ export function conectarFiltrosMapa() {
     if (!chip) return;
     chip.classList.toggle("active");
     const activos = Array.from(grupo.querySelectorAll(".filtro-chip.active")).map((c) => c.dataset.estado);
-    // Evita dejar el mapa vacÌo: si quitan todos, reactivar el clicoteado.
+    // Evita dejar el mapa vac√≠o: si quitan todos, reactivar el clicoteado.
     if (!activos.length) {
       chip.classList.add("active");
       return;
@@ -241,7 +241,7 @@ export function conectarFiltrosMapa() {
   });
 }
 
-// --- Mapa selector de ubicaciÛn (para el formulario de alta de horno) ---
+// --- Mapa selector de ubicaci√≥n (para el formulario de alta de horno) ---
 let mapaPickerInstancia = null;
 let marcadorPicker = null;
 
@@ -279,12 +279,12 @@ export function inicializarMapaPicker(contenedorId, onUbicacionElegida, centroIn
     colocarMarcador(e.latlng.lat, e.latlng.lng);
   });
 
-  // Si ya habÌa coordenadas (ej. editando), coloca el marcador de una vez.
+  // Si ya hab√≠a coordenadas (ej. editando), coloca el marcador de una vez.
   if (centroInicial) {
     colocarMarcador(centroInicial[0], centroInicial[1]);
   }
 
-  // Leaflet necesita recalcular el tamaÒo si el contenedor estaba oculto al crearse.
+  // Leaflet necesita recalcular el tama√±o si el contenedor estaba oculto al crearse.
   setTimeout(() => mapaPickerInstancia.invalidateSize(), 150);
 
   return mapaPickerInstancia;

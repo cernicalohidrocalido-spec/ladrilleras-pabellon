@@ -4,14 +4,14 @@
   <base href="/ladrilleras/">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Control de Quema — IMBIO Pabellón de Arteaga</title>
+<title>Control de Quema â€” IMBIO PabellÃ³n de Arteaga</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<link rel="stylesheet" href="css/styles.css?v=25">
+<link rel="stylesheet" href="css/styles.css?v=26">
 </head>
 <body>
 
@@ -19,29 +19,29 @@
 <div id="login-overlay" class="login-overlay">
   <div class="login-box">
     <img src="assets/logo-imbio.jpg" alt="IMBIO" class="brand-mark login-mark">
-    <h1>?? Control de Quema</h1>
-    <p class="section-sub">IMBIO · Pabellón de Arteaga</p>
+    <h1>ğŸ§± Control de Quema</h1>
+    <p class="section-sub">IMBIO Â· PabellÃ³n de Arteaga</p>
 
     <label>Usuario
       <input type="email" id="login-email" placeholder="tucorreo@ejemplo.com">
     </label>
-    <label>Contraseña
-      <input type="password" id="login-password" placeholder="••••••••">
+    <label>ContraseÃ±a
+      <input type="password" id="login-password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢">
     </label>
 
-    <button id="login-btn" class="btn btn-primary" style="width:100%;margin-top:6px;">?? Iniciar sesión</button>
+    <button id="login-btn" class="btn btn-primary" style="width:100%;margin-top:6px;">ğŸ” Iniciar sesiÃ³n</button>
     <div id="login-error" class="login-error"></div>
   </div>
 </div>
 
 <div class="app" id="app-root" style="display:none;">
 
-  <!-- Barra móvil -->
+  <!-- Barra mÃ³vil -->
   <header class="mobile-topbar" id="mobile-topbar">
-    <button type="button" class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Abrir menú">?</button>
+    <button type="button" class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Abrir menÃº">â˜°</button>
     <div class="mobile-topbar-title">
       <strong>Control de Quema</strong>
-      <span>IMBIO · Pabellón</span>
+      <span>IMBIO Â· PabellÃ³n</span>
     </div>
   </header>
   <div class="sidebar-backdrop" id="sidebar-backdrop" hidden></div>
@@ -51,36 +51,36 @@
     <div class="brand">
       <img src="assets/logo-imbio.jpg" alt="IMBIO" class="brand-mark">
       <div class="brand-text">
-        <strong>?? Control de Quema</strong>
-        <span>Instituto Municipal de Biodiversidad<br>y Protección Ambiental</span>
-        <span class="brand-muni">H. Ayuntamiento de Pabellón de Arteaga</span>
+        <strong>ğŸ§± Control de Quema</strong>
+        <span>Instituto Municipal de Biodiversidad<br>y ProtecciÃ³n Ambiental</span>
+        <span class="brand-muni">H. Ayuntamiento de PabellÃ³n de Arteaga</span>
       </div>
     </div>
 
     <nav class="nav">
       <button class="nav-item active" data-section="buscador">
-        <span class="nav-icon">??</span> Buscador
+        <span class="nav-icon">ğŸ”</span> Buscador
       </button>
       <button class="nav-item" data-section="mapa">
-        <span class="nav-icon">???</span> Mapa
+        <span class="nav-icon">ğŸ—ºï¸</span> Mapa
       </button>
       <button class="nav-item" data-section="hornos">
-        <span class="nav-icon">??</span> Hornos
+        <span class="nav-icon">ğŸ§±</span> Hornos
       </button>
       <button class="nav-item" data-section="permisos">
-        <span class="nav-icon">??</span> Permisos
+        <span class="nav-icon">ğŸ“‹</span> Permisos
       </button>
       <button class="nav-item" data-section="reportes">
-        <span class="nav-icon">??</span> Reportes de quema
+        <span class="nav-icon">ğŸ”¥</span> Reportes de quema
       </button>
       <button class="nav-item" data-section="alertas">
-        <span class="nav-icon">??</span> Alertas
+        <span class="nav-icon">ğŸ””</span> Alertas
       </button>
     </nav>
 
     <div class="sidebar-footer">
-      <span id="auth-status">Sin sesión</span>
-      <button id="logout-btn" class="logout-btn">Cerrar sesión</button>
+      <span id="auth-status">Sin sesiÃ³n</span>
+      <button id="logout-btn" class="logout-btn">Cerrar sesiÃ³n</button>
     </div>
   </aside>
 
@@ -90,31 +90,31 @@
     <!-- KPI strip -->
     <div class="kpi-strip">
       <div class="kpi">
-        <span class="kpi-value" id="kpi-vigentes">—</span>
-        <span class="kpi-label">? Permisos vigentes</span>
+        <span class="kpi-value" id="kpi-vigentes">â€”</span>
+        <span class="kpi-label">âœ… Permisos vigentes</span>
       </div>
       <div class="kpi">
-        <span class="kpi-value" id="kpi-por-vencer">—</span>
-        <span class="kpi-label">?? Por vencer (7 días)</span>
+        <span class="kpi-value" id="kpi-por-vencer">â€”</span>
+        <span class="kpi-label">âš ï¸ Por vencer (7 dÃ­as)</span>
       </div>
       <div class="kpi">
-        <span class="kpi-value" id="kpi-hornos">—</span>
-        <span class="kpi-label">?? Hornos registrados</span>
+        <span class="kpi-value" id="kpi-hornos">â€”</span>
+        <span class="kpi-label">ğŸ§± Hornos registrados</span>
       </div>
       <div class="kpi">
-        <span class="kpi-value" id="kpi-sin-permiso">—</span>
-        <span class="kpi-label">?? Reportes sin permiso (30 días)</span>
+        <span class="kpi-value" id="kpi-sin-permiso">â€”</span>
+        <span class="kpi-label">ğŸš¨ Reportes sin permiso (30 dÃ­as)</span>
       </div>
     </div>
 
-    <!-- Buscador / verificación -->
+    <!-- Buscador / verificaciÃ³n -->
     <section id="section-buscador" class="section active">
-      <h1>?? Verificar permiso</h1>
-      <p class="section-sub">Busca por nombre del propietario, dirección o folio para confirmar si un horno tiene permiso vigente.</p>
+      <h1>ğŸ” Verificar permiso</h1>
+      <p class="section-sub">Busca por nombre del propietario, direcciÃ³n o folio para confirmar si un horno tiene permiso vigente.</p>
 
       <div class="search-bar">
-        <input type="text" id="input-buscar" placeholder="Nombre, dirección o folio…">
-        <button id="btn-buscar" class="btn btn-primary">?? Buscar</button>
+        <input type="text" id="input-buscar" placeholder="Nombre, direcciÃ³n o folioâ€¦">
+        <button id="btn-buscar" class="btn btn-primary">ğŸ” Buscar</button>
       </div>
 
       <div id="resultados-busqueda" class="result-list"></div>
@@ -122,7 +122,7 @@
 
     <!-- Mapa -->
     <section id="section-mapa" class="section">
-      <h1>??? Mapa de hornos</h1>
+      <h1>ğŸ—ºï¸ Mapa de hornos</h1>
       <p class="section-sub">Estado de permiso por horno registrado.</p>
       <div class="mapa-toolbar-row">
         <div class="mapa-filtros">
@@ -137,12 +137,12 @@
               <i class="dot dot-vencido"></i> Vencido / sin permiso
             </button>
           </div>
-          <p class="mapa-filtro-hint">Clic en un estado para filtrar · Pasa el mouse sobre un punto para ver atributos</p>
+          <p class="mapa-filtro-hint">Clic en un estado para filtrar Â· Pasa el mouse sobre un punto para ver atributos</p>
           <p class="mapa-filtro-count" id="mapa-filtro-count"></p>
         </div>
         <div class="capas-toolbar">
-          <button type="button" class="capas-btn activa" id="btn-capa-calles">??? Calles</button>
-          <button type="button" class="capas-btn" id="btn-capa-satelital">??? Satélite</button>
+          <button type="button" class="capas-btn activa" id="btn-capa-calles">ğŸ—ºï¸ Calles</button>
+          <button type="button" class="capas-btn" id="btn-capa-satelital">ğŸ›°ï¸ SatÃ©lite</button>
         </div>
       </div>
       <div id="mapa" class="mapa-container"></div>
@@ -152,12 +152,12 @@
     <section id="section-hornos" class="section">
       <div class="section-header-row">
         <div>
-          <h1>?? Hornos</h1>
-          <p class="section-sub">Catálogo de hornos registrados en el municipio.</p>
+          <h1>ğŸ§± Hornos</h1>
+          <p class="section-sub">CatÃ¡logo de hornos registrados en el municipio.</p>
         </div>
         <div class="header-actions">
-          <button class="btn btn-secondary" id="btn-exportar-hornos">?? Exportar Excel</button>
-          <button class="btn btn-primary" id="btn-nuevo-horno">? Registrar horno</button>
+          <button class="btn btn-secondary" id="btn-exportar-hornos">ğŸ“¥ Exportar Excel</button>
+          <button class="btn btn-primary" id="btn-nuevo-horno">â• Registrar horno</button>
         </div>
       </div>
       <table class="data-table" id="tabla-hornos">
@@ -165,7 +165,7 @@
           <tr>
             <th>Referencia</th>
             <th>Propietario</th>
-            <th>Dirección</th>
+            <th>DirecciÃ³n</th>
             <th>Combustible</th>
             <th>Estado</th>
             <th>Acciones</th>
@@ -179,12 +179,12 @@
     <section id="section-permisos" class="section">
       <div class="section-header-row">
         <div>
-          <h1>?? Permisos</h1>
-          <p class="section-sub">Trámites de permiso de quema.</p>
+          <h1>ğŸ“‹ Permisos</h1>
+          <p class="section-sub">TrÃ¡mites de permiso de quema.</p>
         </div>
         <div class="header-actions">
-          <button class="btn btn-secondary" id="btn-exportar-permisos">?? Exportar Excel</button>
-          <button class="btn btn-primary" id="btn-nuevo-permiso">? Registrar trámite</button>
+          <button class="btn btn-secondary" id="btn-exportar-permisos">ğŸ“¥ Exportar Excel</button>
+          <button class="btn btn-primary" id="btn-nuevo-permiso">â• Registrar trÃ¡mite</button>
         </div>
       </div>
       <table class="data-table" id="tabla-permisos">
@@ -192,10 +192,10 @@
           <tr>
             <th class="sortable" data-sort="folio" title="Ordenar por folio">Folio</th>
             <th>Horno</th>
-            <th>Ubicación</th>
+            <th>UbicaciÃ³n</th>
             <th class="sortable is-sorted desc" data-sort="registro" title="Ordenar por fecha de registro">Fecha registro</th>
             <th class="sortable" data-sort="vigencia" title="Ordenar por fin de vigencia">Vigencia</th>
-            <th>Días autorizados</th>
+            <th>DÃ­as autorizados</th>
             <th class="sortable" data-sort="estado" title="Ordenar por estado">Estado</th>
             <th>Acciones</th>
           </tr>
@@ -208,12 +208,12 @@
     <section id="section-reportes" class="section">
       <div class="section-header-row">
         <div>
-          <h1>?? Reportes de quema</h1>
-          <p class="section-sub">Avisos recibidos y su verificación contra permisos.</p>
+          <h1>ğŸ”¥ Reportes de quema</h1>
+          <p class="section-sub">Avisos recibidos y su verificaciÃ³n contra permisos.</p>
         </div>
         <div class="header-actions">
-          <button class="btn btn-secondary" id="btn-exportar-reportes">?? Exportar Excel</button>
-          <button class="btn btn-primary" id="btn-nuevo-reporte">? Registrar reporte</button>
+          <button class="btn btn-secondary" id="btn-exportar-reportes">ğŸ“¥ Exportar Excel</button>
+          <button class="btn btn-primary" id="btn-nuevo-reporte">â• Registrar reporte</button>
         </div>
       </div>
       <table class="data-table" id="tabla-reportes">
@@ -222,7 +222,7 @@
             <th>Folio</th>
             <th>Fecha</th>
             <th>Origen</th>
-            <th>Núcleo / ubicación</th>
+            <th>NÃºcleo / ubicaciÃ³n</th>
             <th>Horno identificado</th>
             <th>Resultado</th>
             <th>Acciones</th>
@@ -234,30 +234,30 @@
 
     <!-- Alertas -->
     <section id="section-alertas" class="section">
-      <h1>?? Alertas</h1>
-      <p class="section-sub">Generadas automáticamente por vencimiento de permisos y reincidencias.</p>
+      <h1>ğŸ”” Alertas</h1>
+      <p class="section-sub">Generadas automÃ¡ticamente por vencimiento de permisos y reincidencias.</p>
       <div id="lista-alertas" class="alert-list"></div>
     </section>
 
   </main>
 
-  <!-- Navegación inferior móvil -->
+  <!-- NavegaciÃ³n inferior mÃ³vil -->
   <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Secciones">
-    <button type="button" class="mobile-nav-item active" data-section="buscador"><span>??</span>Buscar</button>
-    <button type="button" class="mobile-nav-item" data-section="mapa"><span>???</span>Mapa</button>
-    <button type="button" class="mobile-nav-item" data-section="hornos"><span>??</span>Hornos</button>
-    <button type="button" class="mobile-nav-item" data-section="permisos"><span>??</span>Permisos</button>
-    <button type="button" class="mobile-nav-item" data-section="reportes"><span>??</span>Reportes</button>
-    <button type="button" class="mobile-nav-item" data-section="alertas"><span>??</span>Alertas</button>
+    <button type="button" class="mobile-nav-item active" data-section="buscador"><span>ğŸ”</span>Buscar</button>
+    <button type="button" class="mobile-nav-item" data-section="mapa"><span>ğŸ—ºï¸</span>Mapa</button>
+    <button type="button" class="mobile-nav-item" data-section="hornos"><span>ğŸ§±</span>Hornos</button>
+    <button type="button" class="mobile-nav-item" data-section="permisos"><span>ğŸ“‹</span>Permisos</button>
+    <button type="button" class="mobile-nav-item" data-section="reportes"><span>ğŸ”¥</span>Reportes</button>
+    <button type="button" class="mobile-nav-item" data-section="alertas"><span>ğŸ””</span>Alertas</button>
   </nav>
 
 </div>
 
-<!-- Modal genérico -->
+<!-- Modal genÃ©rico -->
 <div id="modal-overlay" class="modal-overlay">
   <div class="modal">
     <div class="modal-header">
-      <h2 id="modal-title">Título</h2>
+      <h2 id="modal-title">TÃ­tulo</h2>
       <button id="modal-close" class="modal-close">&times;</button>
     </div>
     <div class="modal-body" id="modal-body"></div>
@@ -266,16 +266,16 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
-<script type="module" src="js/db.js?v=25"></script>
-<script type="module" src="js/utils.js?v=25"></script>
-<script type="module" src="js/hornos.js?v=25"></script>
-<script type="module" src="js/permisos.js?v=25"></script>
-<script type="module" src="js/reportes.js?v=25"></script>
-<script type="module" src="js/mapa.js?v=25"></script>
-<script type="module" src="js/pdf-inspeccion.js?v=25"></script>
-<script type="module" src="js/exportar.js?v=25"></script>
-<script type="module" src="js/auth.js?v=25"></script>
-<script type="module" src="js/app.js?v=25"></script>
+<script type="module" src="js/db.js?v=26"></script>
+<script type="module" src="js/utils.js?v=26"></script>
+<script type="module" src="js/hornos.js?v=26"></script>
+<script type="module" src="js/permisos.js?v=26"></script>
+<script type="module" src="js/reportes.js?v=26"></script>
+<script type="module" src="js/mapa.js?v=26"></script>
+<script type="module" src="js/pdf-inspeccion.js?v=26"></script>
+<script type="module" src="js/exportar.js?v=26"></script>
+<script type="module" src="js/auth.js?v=26"></script>
+<script type="module" src="js/app.js?v=26"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"dcb1f5a126714bc6bc751bdc267b2a88","r":1,"spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>

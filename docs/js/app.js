@@ -1,9 +1,9 @@
-import { listarHornos, renderTablaHornos, abrirFormularioHorno, eliminarHorno, abrirDetalleHorno } from "./hornos.js?v=25";
-import { listarPermisos, renderTablaPermisos, abrirFormularioPermiso, eliminarPermiso, ordenarPermisos } from "./permisos.js?v=25";
-import { listarReportes, renderTablaReportes, abrirFormularioReporte, abrirFormularioEditarReporte, eliminarReporte, generarPdfInspeccion, generarPdfSancion } from "./reportes.js?v=25";
-import { pintarHornosEnMapa, conectarFiltrosMapa, enfocarHornoEnMapa } from "./mapa.js?v=25";
-import { calcularEstadoPermiso, pillHtml, formatFecha, confirmarAccion } from "./utils.js?v=25";
-import { exportarHornos, exportarPermisos, exportarReportes } from "./exportar.js?v=25";
+import { listarHornos, renderTablaHornos, abrirFormularioHorno, eliminarHorno, abrirDetalleHorno } from "./hornos.js?v=26";
+import { listarPermisos, renderTablaPermisos, abrirFormularioPermiso, eliminarPermiso, ordenarPermisos } from "./permisos.js?v=26";
+import { listarReportes, renderTablaReportes, abrirFormularioReporte, abrirFormularioEditarReporte, eliminarReporte, generarPdfInspeccion, generarPdfSancion } from "./reportes.js?v=26";
+import { pintarHornosEnMapa, conectarFiltrosMapa, enfocarHornoEnMapa } from "./mapa.js?v=26";
+import { calcularEstadoPermiso, pillHtml, formatFecha, confirmarAccion } from "./utils.js?v=26";
+import { exportarHornos, exportarPermisos, exportarReportes } from "./exportar.js?v=26";
 
 let sortPermisos = { campo: "registro", dir: "desc" };
 
@@ -30,7 +30,7 @@ function irASeccion(nombre) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-// --- Navegación entre secciones (sidebar + bottom bar) ---
+// --- NavegaciÃ³n entre secciones (sidebar + bottom bar) ---
 document.querySelectorAll(".nav-item, .mobile-nav-item").forEach((btn) => {
   btn.addEventListener("click", () => irASeccion(btn.dataset.section));
 });
@@ -118,7 +118,7 @@ function renderAlertas() {
     .forEach((r) => {
       alertas.push({
         severidad: "alta",
-        texto: `Reporte de quema sin permiso vigente en "${r.direccion_reportada || "ubicación no especificada"}".`,
+        texto: `Reporte de quema sin permiso vigente en "${r.direccion_reportada || "ubicaciÃ³n no especificada"}".`,
       });
     });
 
@@ -204,9 +204,9 @@ function ejecutarBusqueda() {
             (r) => `
       <div class="result-card">
         <div>
-          <div class="r-name">${r.horno.nombre_referencia} — ${r.horno.propietario_nombre || ""}</div>
+          <div class="r-name">${r.horno.nombre_referencia} â€” ${r.horno.propietario_nombre || ""}</div>
           <div class="r-meta">${r.horno.direccion || ""}</div>
-          ${r.permiso ? `<div class="r-folio">Folio ${r.permiso.folio} · vigencia hasta ${formatFecha(r.permiso.fecha_vigencia_fin)}</div>` : `<div class="r-folio">Sin permiso registrado</div>`}
+          ${r.permiso ? `<div class="r-folio">Folio ${r.permiso.folio} Â· vigencia hasta ${formatFecha(r.permiso.fecha_vigencia_fin)}</div>` : `<div class="r-folio">Sin permiso registrado</div>`}
         </div>
         ${pillHtml(r.estado)}
       </div>`
@@ -238,7 +238,7 @@ document.getElementById("btn-exportar-reportes").addEventListener("click", () =>
 
 window.addEventListener("cq:autenticado", cargarTodo);
 
-// --- Acciones de fila: ver / editar / eliminar (delegación de eventos) ---
+// --- Acciones de fila: ver / editar / eliminar (delegaciÃ³n de eventos) ---
 
 document.querySelector("#tabla-hornos tbody").addEventListener("click", async (e) => {
   const btn = e.target.closest("button[data-action]");
@@ -249,7 +249,7 @@ document.querySelector("#tabla-hornos tbody").addEventListener("click", async (e
   if (btn.dataset.action === "editar") {
     abrirFormularioHorno(cargarTodo, horno);
   } else if (btn.dataset.action === "eliminar") {
-    if (confirmarAccion(`¿Eliminar el horno "${horno.nombre_referencia || "sin nombre"}"? También pierde su relación con los permisos y reportes ya guardados.`)) {
+    if (confirmarAccion(`Â¿Eliminar el horno "${horno.nombre_referencia || "sin nombre"}"? TambiÃ©n pierde su relaciÃ³n con los permisos y reportes ya guardados.`)) {
       await eliminarHorno(horno.id);
       cargarTodo();
     }
@@ -295,7 +295,7 @@ document.querySelector("#tabla-permisos tbody").addEventListener("click", async 
   if (btn.dataset.action === "editar") {
     abrirFormularioPermiso(cargarTodo, permiso);
   } else if (btn.dataset.action === "eliminar") {
-    if (confirmarAccion(`¿Eliminar el permiso con folio "${permiso.folio || "sin folio"}"?`)) {
+    if (confirmarAccion(`Â¿Eliminar el permiso con folio "${permiso.folio || "sin folio"}"?`)) {
       await eliminarPermiso(permiso.id);
       cargarTodo();
     }
@@ -316,7 +316,7 @@ document.querySelector("#tabla-reportes tbody").addEventListener("click", async 
   } else if (btn.dataset.action === "editar") {
     abrirFormularioEditarReporte(reporte, cargarTodo, horno);
   } else if (btn.dataset.action === "eliminar") {
-    if (confirmarAccion("¿Eliminar este reporte de quema?")) {
+    if (confirmarAccion("Â¿Eliminar este reporte de quema?")) {
       await eliminarReporte(reporte.id);
       cargarTodo();
     }

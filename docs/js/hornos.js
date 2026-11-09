@@ -1,6 +1,6 @@
-import { db, collection, doc, addDoc, updateDoc, deleteDoc, getDocs, Timestamp, GeoPoint } from "./db.js?v=25";
-import { abrirModal, cerrarModal, accionesHtml, formatFecha, pillHtml } from "./utils.js?v=25";
-import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=25";
+import { db, collection, doc, addDoc, updateDoc, deleteDoc, getDocs, Timestamp, GeoPoint } from "./db.js?v=26";
+import { abrirModal, cerrarModal, accionesHtml, formatFecha, pillHtml } from "./utils.js?v=26";
+import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=26";
 
 const hornosCol = collection(db, "hornos");
 
@@ -35,11 +35,11 @@ export function renderTablaHornos(hornos) {
     .map(
       (h) => `
     <tr>
-      <td>${h.nombre_referencia || "—"}</td>
-      <td>${h.propietario_nombre || "—"}</td>
-      <td>${h.direccion || "—"}</td>
-      <td>${h.combustible_habitual || "—"}</td>
-      <td>${h.estado || "—"}</td>
+      <td>${h.nombre_referencia || "â€”"}</td>
+      <td>${h.propietario_nombre || "â€”"}</td>
+      <td>${h.direccion || "â€”"}</td>
+      <td>${h.combustible_habitual || "â€”"}</td>
+      <td>${h.estado || "â€”"}</td>
       <td>${accionesHtml(h.id)}</td>
     </tr>`
     )
@@ -49,22 +49,22 @@ export function renderTablaHornos(hornos) {
 function formHornoHtml(horno) {
   return `
     <label>Nombre de referencia
-      <input type="text" id="f-nombre" placeholder="Horno Familia Ramírez" value="${horno?.nombre_referencia || ""}">
+      <input type="text" id="f-nombre" placeholder="Horno Familia RamÃ­rez" value="${horno?.nombre_referencia || ""}">
     </label>
     <label>Propietario
       <input type="text" id="f-propietario" value="${horno?.propietario_nombre || ""}">
     </label>
-    <label>Teléfono de contacto
+    <label>TelÃ©fono de contacto
       <input type="text" id="f-contacto" value="${horno?.propietario_contacto || ""}">
     </label>
-    <label>Dirección
+    <label>DirecciÃ³n
       <input type="text" id="f-direccion" value="${horno?.direccion || ""}">
     </label>
 
-    <label>Ubicación — haz clic en el mapa (o arrastra el marcador) para marcar el horno</label>
+    <label>UbicaciÃ³n â€” haz clic en el mapa (o arrastra el marcador) para marcar el horno</label>
     <div class="capas-toolbar">
       <button type="button" class="capas-btn activa" id="f-btn-calles">Calles</button>
-      <button type="button" class="capas-btn" id="f-btn-satelital">Satélite</button>
+      <button type="button" class="capas-btn" id="f-btn-satelital">SatÃ©lite</button>
     </div>
     <div id="f-mapa-picker" class="picker-map"></div>
 
@@ -79,12 +79,12 @@ function formHornoHtml(horno) {
     <div class="field-row">
       <label>Tipo de horno
         <select id="f-tipo">
-          ${["fijo", "móvil", "colmena", "otro"].map((t) => `<option ${horno?.tipo_horno === t ? "selected" : ""}>${t}</option>`).join("")}
+          ${["fijo", "mÃ³vil", "colmena", "otro"].map((t) => `<option ${horno?.tipo_horno === t ? "selected" : ""}>${t}</option>`).join("")}
         </select>
       </label>
       <label>Combustible habitual
         <select id="f-combustible">
-          ${["leña", "aserrín", "llanta", "gas", "otro"].map((c) => `<option ${horno?.combustible_habitual === c ? "selected" : ""}>${c}</option>`).join("")}
+          ${["leÃ±a", "aserrÃ­n", "llanta", "gas", "otro"].map((c) => `<option ${horno?.combustible_habitual === c ? "selected" : ""}>${c}</option>`).join("")}
         </select>
       </label>
     </div>
@@ -93,12 +93,12 @@ function formHornoHtml(horno) {
         ${["activo", "inactivo", "clausurado"].map((e) => `<option ${horno?.estado === e ? "selected" : ""}>${e}</option>`).join("")}
       </select>
     </label>
-    <button class="btn btn-primary" id="f-guardar">?? ${horno ? "Guardar cambios" : "Guardar horno"}</button>
+    <button class="btn btn-primary" id="f-guardar">ðŸ’¾ ${horno ? "Guardar cambios" : "Guardar horno"}</button>
   `;
 }
 
 export function abrirFormularioHorno(onGuardado, horno) {
-  abrirModal(horno ? "?? Editar horno" : "?? Registrar horno", formHornoHtml(horno));
+  abrirModal(horno ? "âœï¸ Editar horno" : "ðŸ§± Registrar horno", formHornoHtml(horno));
 
   const inputLat = document.getElementById("f-lat");
   const inputLng = document.getElementById("f-lng");
@@ -117,7 +117,7 @@ export function abrirFormularioHorno(onGuardado, horno) {
     { calles: "f-btn-calles", satelital: "f-btn-satelital" }
   );
 
-  // Si el usuario escribe las coordenadas a mano, mueve el marcador también.
+  // Si el usuario escribe las coordenadas a mano, mueve el marcador tambiÃ©n.
   function sincronizarDesdeInputs() {
     const lat = parseFloat(inputLat.value);
     const lng = parseFloat(inputLng.value);
@@ -130,7 +130,7 @@ export function abrirFormularioHorno(onGuardado, horno) {
 
   document.getElementById("f-guardar").addEventListener("click", async () => {
     if (!inputLat.value || !inputLng.value) {
-      alert("Marca la ubicación del horno en el mapa antes de guardar.");
+      alert("Marca la ubicaciÃ³n del horno en el mapa antes de guardar.");
       return;
     }
     const data = {
@@ -163,7 +163,7 @@ export function abrirDetalleHorno(horno, permisosDelHorno, reportesDelHorno) {
           (p) => `
       <div class="detalle-item">
         <strong>${p.folio || "Sin folio"}</strong>
-        <span>${formatFecha(p.fecha_vigencia_inicio)} – ${formatFecha(p.fecha_vigencia_fin)}</span>
+        <span>${formatFecha(p.fecha_vigencia_inicio)} â€“ ${formatFecha(p.fecha_vigencia_fin)}</span>
       </div>`
         )
         .join("")
@@ -174,7 +174,7 @@ export function abrirDetalleHorno(horno, permisosDelHorno, reportesDelHorno) {
         .map(
           (r) => `
       <div class="detalle-item">
-        <span>${formatFecha(r.fecha_hora_reporte)} — ${r.origen_reporte || ""}</span>
+        <span>${formatFecha(r.fecha_hora_reporte)} â€” ${r.origen_reporte || ""}</span>
         ${pillHtml(r.resultado_verificacion)}
       </div>`
         )
@@ -182,24 +182,24 @@ export function abrirDetalleHorno(horno, permisosDelHorno, reportesDelHorno) {
     : `<p class="section-sub">Sin reportes registrados.</p>`;
 
   abrirModal(
-    "?? Ficha del horno",
+    "ðŸ§± Ficha del horno",
     `
     <div class="detalle-grid">
-      <div><span class="detalle-label">Referencia</span><strong>${horno.nombre_referencia || "—"}</strong></div>
-      <div><span class="detalle-label">Estado</span><strong>${horno.estado || "—"}</strong></div>
-      <div><span class="detalle-label">Propietario</span><strong>${horno.propietario_nombre || "—"}</strong></div>
-      <div><span class="detalle-label">Contacto</span><strong>${horno.propietario_contacto || "—"}</strong></div>
-      <div><span class="detalle-label">Dirección</span><strong>${horno.direccion || "—"}</strong></div>
-      <div><span class="detalle-label">Tipo de horno</span><strong>${horno.tipo_horno || "—"}</strong></div>
-      <div><span class="detalle-label">Combustible habitual</span><strong>${horno.combustible_habitual || "—"}</strong></div>
+      <div><span class="detalle-label">Referencia</span><strong>${horno.nombre_referencia || "â€”"}</strong></div>
+      <div><span class="detalle-label">Estado</span><strong>${horno.estado || "â€”"}</strong></div>
+      <div><span class="detalle-label">Propietario</span><strong>${horno.propietario_nombre || "â€”"}</strong></div>
+      <div><span class="detalle-label">Contacto</span><strong>${horno.propietario_contacto || "â€”"}</strong></div>
+      <div><span class="detalle-label">DirecciÃ³n</span><strong>${horno.direccion || "â€”"}</strong></div>
+      <div><span class="detalle-label">Tipo de horno</span><strong>${horno.tipo_horno || "â€”"}</strong></div>
+      <div><span class="detalle-label">Combustible habitual</span><strong>${horno.combustible_habitual || "â€”"}</strong></div>
       <div><span class="detalle-label">Registrado</span><strong>${formatFecha(horno.fecha_registro)}</strong></div>
-      <div><span class="detalle-label">Coordenadas</span><strong>${horno.ubicacion ? `${horno.ubicacion.latitude.toFixed(5)}, ${horno.ubicacion.longitude.toFixed(5)}` : "—"}</strong></div>
+      <div><span class="detalle-label">Coordenadas</span><strong>${horno.ubicacion ? `${horno.ubicacion.latitude.toFixed(5)}, ${horno.ubicacion.longitude.toFixed(5)}` : "â€”"}</strong></div>
     </div>
 
-    <h3 class="detalle-subtitulo">?? Permisos</h3>
+    <h3 class="detalle-subtitulo">ðŸ“‹ Permisos</h3>
     ${permisosHtml}
 
-    <h3 class="detalle-subtitulo">?? Reportes de quema</h3>
+    <h3 class="detalle-subtitulo">ðŸ”¥ Reportes de quema</h3>
     ${reportesHtml}
   `
   );

@@ -1,17 +1,17 @@
 import {
   db, storage, collection, addDoc, updateDoc, deleteDoc, getDocs, doc,
   Timestamp, GeoPoint, ref, uploadBytes, getDownloadURL,
-} from "./db.js?v=25";
+} from "./db.js?v=26";
 import {
   abrirModal, cerrarModal, pillHtml, formatFechaHora, distanciaMetros,
   calcularEstadoPermiso, accionesHtmlReporte, OPCIONES_HALLAZGOS,
   OPCIONES_SANCION, SANCION_MULTA_TEXTO, SANCION_MULTA_MIN, SANCION_MULTA_MAX, SANCION_MULTA_SUGERIDA,
   UMA_DIARIA_MXN, UMA_VIGENCIA, calcularMultaPesos, formatPesosMXN, numeroALetrasPesos, SANCION_PLAZO_PAGO,
-} from "./utils.js?v=25";
-import { listarHornos } from "./hornos.js?v=25";
-import { listarPermisos } from "./permisos.js?v=25";
-import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=25";
-import { generarPdfInspeccion, generarPdfSancion } from "./pdf-inspeccion.js?v=25";
+} from "./utils.js?v=26";
+import { listarHornos } from "./hornos.js?v=26";
+import { listarPermisos } from "./permisos.js?v=26";
+import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=26";
+import { generarPdfInspeccion, generarPdfSancion } from "./pdf-inspeccion.js?v=26";
 
 const reportesCol = collection(db, "reportes_quema");
 const RADIO_MATCH_METROS = 150;
@@ -33,7 +33,7 @@ function checklistHallazgosHtml(seleccionados = []) {
   const set = new Set(seleccionados || []);
   return `
     <div class="hallazgos-label">Hallazgos</div>
-    <div class="hallazgos-checklist" role="group" aria-label="Hallazgos de la inspecciÛn">
+    <div class="hallazgos-checklist" role="group" aria-label="Hallazgos de la inspecci√≥n">
       ${OPCIONES_HALLAZGOS.map(
         (o) => `<label class="check-row">
           <input type="checkbox" class="f-hallazgo" value="${o.id}" ${set.has(o.id) ? "checked" : ""}>
@@ -50,9 +50,9 @@ function checklistSancionHtml(seleccionados = [], umas = "", obs = "") {
   const pesos = calcularMultaPesos(valorUmas);
   return `
     <div class="sancion-bloque">
-      <div class="hallazgos-label">Datos para acta de sanciÛn (documento aparte)</div>
+      <div class="hallazgos-label">Datos para acta de sanci√≥n (documento aparte)</div>
       <p class="sancion-fund">${SANCION_MULTA_TEXTO}</p>
-      <p class="geo-hint">Infracciones c) combustiÛn de llantas y f) emisiones a la atmÛsfera. UMA diaria ${formatPesosMXN(UMA_DIARIA_MXN)} (vigente desde ${UMA_VIGENCIA}).</p>
+      <p class="geo-hint">Infracciones c) combusti√≥n de llantas y f) emisiones a la atm√≥sfera. UMA diaria ${formatPesosMXN(UMA_DIARIA_MXN)} (vigente desde ${UMA_VIGENCIA}).</p>
       <div class="hallazgos-checklist" role="group" aria-label="Infracciones">
         ${OPCIONES_SANCION.map(
           (o) => `<label class="check-row">
@@ -63,7 +63,7 @@ function checklistSancionHtml(seleccionados = [], umas = "", obs = "") {
       </div>
       <div class="field-row">
         <label>Multa (UMA)
-          <input type="number" id="f-sancion-umas" min="${SANCION_MULTA_MIN}" max="${SANCION_MULTA_MAX}" step="1" placeholder="${SANCION_MULTA_MIN}ñ${SANCION_MULTA_MAX}" value="${valorUmas}">
+          <input type="number" id="f-sancion-umas" min="${SANCION_MULTA_MIN}" max="${SANCION_MULTA_MAX}" step="1" placeholder="${SANCION_MULTA_MIN}‚Äì${SANCION_MULTA_MAX}" value="${valorUmas}">
         </label>
       </div>
       <div class="uma-calc" id="f-uma-calc">
@@ -71,8 +71,8 @@ function checklistSancionHtml(seleccionados = [], umas = "", obs = "") {
         <div><span>Cantidad con letra</span><strong id="f-sancion-letra">${numeroALetrasPesos(pesos)}</strong></div>
         <p class="geo-hint" style="margin:6px 0 0">${SANCION_PLAZO_PAGO}</p>
       </div>
-      <label>Observaciones de la sanciÛn
-        <textarea id="f-sancion-obs" rows="2" placeholder="Fundamento, agravantes, plazosÖ">${obs || ""}</textarea>
+      <label>Observaciones de la sanci√≥n
+        <textarea id="f-sancion-obs" rows="2" placeholder="Fundamento, agravantes, plazos‚Ä¶">${obs || ""}</textarea>
       </label>
     </div>
   `;
@@ -97,27 +97,27 @@ function bloqueResponsableHtml(reporte) {
   return `
     <div class="responsable-bloque">
       <div class="hallazgos-label">Responsable de la ladrillera</div>
-      <p class="geo-hint">Conforme a lo que manifieste o acredite con credencial de elector u otra identificaciÛn.</p>
+      <p class="geo-hint">Conforme a lo que manifieste o acredite con credencial de elector u otra identificaci√≥n.</p>
       <label>Nombre del responsable
         <input type="text" id="f-responsable-nombre" placeholder="Nombre completo" value="${reporte?.responsable_nombre || ""}">
       </label>
       <label>Domicilio particular
-        <input type="text" id="f-responsable-domicilio" placeholder="Calle, n˙mero, colonia, municipio" value="${reporte?.responsable_domicilio || ""}">
+        <input type="text" id="f-responsable-domicilio" placeholder="Calle, n√∫mero, colonia, municipio" value="${reporte?.responsable_domicilio || ""}">
       </label>
       <div class="field-row">
-        <label>IdentificaciÛn
+        <label>Identificaci√≥n
           <select id="f-responsable-id-tipo">
             <option value="credencial_elector" ${tipo === "credencial_elector" ? "selected" : ""}>Credencial de elector</option>
             <option value="manifestacion" ${tipo === "manifestacion" ? "selected" : ""}>Lo que manifieste</option>
-            <option value="otro" ${tipo === "otro" ? "selected" : ""}>Otra identificaciÛn</option>
+            <option value="otro" ${tipo === "otro" ? "selected" : ""}>Otra identificaci√≥n</option>
           </select>
         </label>
-        <label>Folio / n˙mero de ID
+        <label>Folio / n√∫mero de ID
           <input type="text" id="f-responsable-id-folio" placeholder="Clave o folio" value="${reporte?.responsable_id_folio || ""}">
         </label>
       </div>
-      <label>ManifestaciÛn / observaciones de identidad
-        <textarea id="f-responsable-manifestacion" rows="2" placeholder="Datos adicionales que manifieste el responsableÖ">${reporte?.responsable_manifestacion || ""}</textarea>
+      <label>Manifestaci√≥n / observaciones de identidad
+        <textarea id="f-responsable-manifestacion" rows="2" placeholder="Datos adicionales que manifieste el responsable‚Ä¶">${reporte?.responsable_manifestacion || ""}</textarea>
       </label>
     </div>
   `;
@@ -132,7 +132,7 @@ function textoHallazgosParaPdf(reporte) {
   const checks = etiquetasHallazgos(reporte.hallazgos_checklist || []);
   const obs = (reporte.observaciones_adicionales || reporte.hallazgos || "").trim();
   const partes = [];
-  if (checks.length) partes.push(checks.map((t) => `ï ${t}`).join("\n"));
+  if (checks.length) partes.push(checks.map((t) => `‚Ä¢ ${t}`).join("\n"));
   if (obs) partes.push(`Observaciones adicionales:\n${obs}`);
   return partes.join("\n\n") || "Sin hallazgos registrados.";
 }
@@ -201,7 +201,7 @@ async function comprimirImagen(file, maxAncho = 1024, calidad = 0.72) {
   try {
     let bitmap;
     if (typeof createImageBitmap === "function") {
-      bitmap = await conTimeout(createImageBitmap(file), 8000, "CompresiÛn de imagen agotÛ el tiempo");
+      bitmap = await conTimeout(createImageBitmap(file), 8000, "Compresi√≥n de imagen agot√≥ el tiempo");
     } else {
       throw new Error("createImageBitmap no disponible");
     }
@@ -216,7 +216,7 @@ async function comprimirImagen(file, maxAncho = 1024, calidad = 0.72) {
     const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", calidad));
     return blob || file;
   } catch (err) {
-    console.warn("CompresiÛn fallÛ, se usa archivo original:", err?.message || err);
+    console.warn("Compresi√≥n fall√≥, se usa archivo original:", err?.message || err);
     return file;
   }
 }
@@ -243,7 +243,7 @@ async function subirFotosReporte(reporteId, archivos) {
         await conTimeout(
           uploadBytes(storageRef, blob, { contentType: "image/jpeg" }),
           10000,
-          "Storage no respondiÛ a tiempo"
+          "Storage no respondi√≥ a tiempo"
         );
         const url = await conTimeout(getDownloadURL(storageRef), 8000, "No se obtuvo URL de la foto");
         subidas.push({ url, nombre: file.name || nombre, contentType: "image/jpeg", origen: "storage" });
@@ -266,9 +266,7 @@ async function subirFotosReporte(reporteId, archivos) {
   return { fotos: subidas, avisos };
 }
 
-function payloadBaseReporte(data) {
-  const umas = Number(data.sancion_umas) || 0;
-  const pesos = calcularMultaPesos(umas);
+function payloadBaseReporte(data, verificacion) {
   return {
     origen_reporte: data.origen,
     direccion_reportada: data.direccion,
@@ -280,16 +278,8 @@ function payloadBaseReporte(data) {
       hallazgos_checklist: data.hallazgos_checklist,
       observaciones_adicionales: data.observaciones_adicionales,
     }),
-    responsable_nombre: data.responsable_nombre || "",
-    responsable_domicilio: data.responsable_domicilio || "",
-    responsable_id_tipo: data.responsable_id_tipo || "",
-    responsable_id_folio: data.responsable_id_folio || "",
-    responsable_manifestacion: data.responsable_manifestacion || "",
     sancion_infracciones: data.sancion_infracciones || [],
     sancion_umas: data.sancion_umas || "",
-    sancion_uma_valor: UMA_DIARIA_MXN,
-    sancion_pesos: pesos,
-    sancion_pesos_letra: pesos ? numeroALetrasPesos(pesos) : "",
     sancion_observaciones: data.sancion_observaciones || "",
     atendido_por: data.atendidoPor,
     seguimiento: data.seguimiento || "",
@@ -308,7 +298,7 @@ export async function crearReporte(data, verificacion, archivosFoto = []) {
     permiso_id_relacionado: verificacion.permiso ? doc(db, "permisos", verificacion.permiso.id) : null,
     fotos: [],
     origen_ubicacion: data.origen_ubicacion || "manual",
-    ...payloadBaseReporte(data),
+    ...payloadBaseReporte(data, verificacion),
   });
 
   let fotos = [];
@@ -320,7 +310,7 @@ export async function crearReporte(data, verificacion, archivosFoto = []) {
       avisos = res.avisos;
       if (fotos.length) await updateDoc(docRef, { fotos });
     } catch (err) {
-      console.warn("No se pudieron adjuntar fotos, el reporte sÌ se guardÛ:", err?.message || err);
+      console.warn("No se pudieron adjuntar fotos, el reporte s√≠ se guard√≥:", err?.message || err);
       avisos.push("todas");
     }
   }
@@ -334,7 +324,7 @@ export async function actualizarReporte(id, data, archivosFoto = [], fotosExiste
       const { fotos: nuevas } = await subirFotosReporte(id, archivosFoto);
       payload.fotos = [...fotosExistentes, ...nuevas].slice(0, MAX_FOTOS);
     } catch (err) {
-      console.warn("ActualizaciÛn sin nuevas fotos:", err?.message || err);
+      console.warn("Actualizaci√≥n sin nuevas fotos:", err?.message || err);
     }
   }
   return updateDoc(doc(db, "reportes_quema", id), payload);
@@ -353,12 +343,12 @@ export function renderTablaReportes(reportes, hornosById) {
   tbody.innerHTML = reportes
     .map((r) => {
       const horno = hornosById[r.horno_id_identificado?.id];
-      const lugar = r.nucleo_localidad || r.direccion_reportada || "ó";
+      const lugar = r.nucleo_localidad || r.direccion_reportada || "‚Äî";
       return `
       <tr>
-        <td style="font-family:var(--font-mono);font-weight:600">${r.folio || "ó"}</td>
+        <td style="font-family:var(--font-mono);font-weight:600">${r.folio || "‚Äî"}</td>
         <td>${formatFechaHora(r.fecha_hora_reporte)}</td>
-        <td>${r.origen_reporte || "ó"}</td>
+        <td>${r.origen_reporte || "‚Äî"}</td>
         <td>${lugar}</td>
         <td>${horno ? horno.nombre_referencia : "No identificado"}</td>
         <td>${pillHtml(r.resultado_verificacion)}</td>
@@ -371,47 +361,45 @@ export function renderTablaReportes(reportes, hornosById) {
 function formInspeccionHtml(reporte) {
   const editando = Boolean(reporte);
   const fotosExistentes = Array.isArray(reporte?.fotos) ? reporte.fotos : [];
-  const folioMostrar = reporte?.folio || (editando ? "ó" : "Se asignar· al guardar");
+  const folioMostrar = reporte?.folio || (editando ? "‚Äî" : "Se asignar√° al guardar");
   return `
     <div class="form-inspeccion">
       <div class="form-inspeccion-header">
         <img src="assets/logo-imbio.jpg" alt="IMBIO" class="form-inspeccion-logo">
         <div>
-          <strong>IMBIO ∑ Control de Quema</strong>
-          <span>Instituto Municipal de Biodiversidad y ProtecciÛn Ambiental</span>
-          <span>H. Ayuntamiento de PabellÛn de Arteaga</span>
+          <strong>IMBIO ¬∑ Control de Quema</strong>
+          <span>Instituto Municipal de Biodiversidad y Protecci√≥n Ambiental</span>
+          <span>H. Ayuntamiento de Pabell√≥n de Arteaga</span>
         </div>
       </div>
 
       <div class="folio-inspeccion-box">
-        <span>Folio de inspecciÛn</span>
+        <span>Folio de inspecci√≥n</span>
         <strong id="f-folio-display">${folioMostrar}</strong>
       </div>
 
       <label>Origen del reporte
         <select id="f-origen">
-          ${["patrulla", "ciudadano", "airepuro", "anÛnimo", "inspecciÛn"].map(
+          ${["patrulla", "ciudadano", "airepuro", "an√≥nimo", "inspecci√≥n"].map(
             (o) => `<option ${(!editando && o === "patrulla") || reporte?.origen_reporte === o ? "selected" : ""}>${o}</option>`
           ).join("")}
         </select>
       </label>
-      <label>N˙cleo de ladrilleras o localidad
-        <input type="text" id="f-nucleo" placeholder="Ej. N˙cleo Las ¡nimas, Ojo ZarcoÖ" value="${reporte?.nucleo_localidad || ""}">
+      <label>N√∫cleo de ladrilleras o localidad
+        <input type="text" id="f-nucleo" placeholder="Ej. N√∫cleo Las √Ånimas, Ojo Zarco‚Ä¶" value="${reporte?.nucleo_localidad || ""}">
       </label>
-      <label>DirecciÛn aproximada del predio / horno
+      <label>Direcci√≥n aproximada
         <input type="text" id="f-direccion" value="${reporte?.direccion_reportada || ""}">
       </label>
 
-      ${bloqueResponsableHtml(reporte)}
-
-      <label>UbicaciÛn de la inspecciÛn</label>
+      <label>Ubicaci√≥n de la inspecci√≥n</label>
       <div class="geo-toolbar">
-        <button type="button" class="btn btn-secondary" id="f-btn-gps">?? Usar mi ubicaciÛn</button>
+        <button type="button" class="btn btn-secondary" id="f-btn-gps">üìç Usar mi ubicaci√≥n</button>
         <span class="geo-hint" id="f-geo-hint">O marca el punto en el mapa</span>
       </div>
       <div class="capas-toolbar">
         <button type="button" class="capas-btn activa" id="f-btn-calles">Calles</button>
-        <button type="button" class="capas-btn" id="f-btn-satelital">SatÈlite</button>
+        <button type="button" class="capas-btn" id="f-btn-satelital">Sat√©lite</button>
       </div>
       <div id="f-mapa-picker" class="picker-map picker-map-compact"></div>
       <div class="field-row">
@@ -422,19 +410,19 @@ function formInspeccionHtml(reporte) {
           <input type="text" id="f-lng" placeholder="-102.1234" value="${reporte?.ubicacion_reportada?.longitude ?? ""}" ${editando ? "readonly" : ""}>
         </label>
       </div>
-      ${editando ? `<p class="section-sub">La ubicaciÛn y el resultado de verificaciÛn no cambian al editar.</p>` : ""}
+      ${editando ? `<p class="section-sub">La ubicaci√≥n y el resultado de verificaci√≥n no cambian al editar.</p>` : ""}
 
-      <label>DescripciÛn de la inspecciÛn
+      <label>Descripci√≥n de la inspecci√≥n
         <textarea id="f-descripcion" rows="2">${reporte?.descripcion || ""}</textarea>
       </label>
       ${checklistHallazgosHtml(reporte?.hallazgos_checklist || [])}
       <label>Observaciones adicionales
-        <textarea id="f-observaciones" rows="2" placeholder="Detalle libre del inspectorÖ">${reporte?.observaciones_adicionales || ""}</textarea>
+        <textarea id="f-observaciones" rows="2" placeholder="Detalle libre del inspector‚Ä¶">${reporte?.observaciones_adicionales || ""}</textarea>
       </label>
       <label>Atendido por (inspector)
         <input type="text" id="f-atendido" value="${reporte?.atendido_por || ""}">
       </label>
-      <label>Seguimiento / acciÛn tomada
+      <label>Seguimiento / acci√≥n tomada
         <textarea id="f-seguimiento" rows="2">${reporte?.seguimiento || ""}</textarea>
       </label>
 
@@ -445,10 +433,10 @@ function formInspeccionHtml(reporte) {
       )}
 
       <div class="fotos-bloque">
-        <div class="hallazgos-label">FotografÌas de la inspecciÛn (m·x. ${MAX_FOTOS})</div>
+        <div class="hallazgos-label">Fotograf√≠as de la inspecci√≥n (m√°x. ${MAX_FOTOS})</div>
         <div class="fotos-acciones">
-          <button type="button" class="btn btn-primary" id="f-btn-camara">?? Tomar foto</button>
-          <button type="button" class="btn btn-secondary" id="f-btn-galeria">??? GalerÌa</button>
+          <button type="button" class="btn btn-primary" id="f-btn-camara">üì∑ Tomar foto</button>
+          <button type="button" class="btn btn-secondary" id="f-btn-galeria">üñºÔ∏è Galer√≠a</button>
         </div>
         <input type="file" id="f-fotos-camara" accept="image/*" capture="environment" hidden>
         <input type="file" id="f-fotos-galeria" accept="image/*" multiple hidden>
@@ -463,11 +451,11 @@ function formInspeccionHtml(reporte) {
       </div>
 
       <div class="form-acciones-fila">
-        <button class="btn btn-primary" id="f-verificar">${editando ? "?? Guardar cambios" : "?? Verificar y guardar"}</button>
+        <button class="btn btn-primary" id="f-verificar">${editando ? "üíæ Guardar cambios" : "üîç Verificar y guardar"}</button>
         ${
           editando
-            ? `<button type="button" class="btn btn-secondary" id="f-pdf">?? Acta de inspecciÛn</button>
-               <button type="button" class="btn btn-secondary" id="f-pdf-sancion">?? Acta de sanciÛn</button>`
+            ? `<button type="button" class="btn btn-secondary" id="f-pdf">üìã Acta de inspecci√≥n</button>
+               <button type="button" class="btn btn-secondary" id="f-pdf-sancion">‚öñÔ∏è Acta de sanci√≥n</button>`
             : ""
         }
       </div>
@@ -489,7 +477,7 @@ function conectarFotosPreview(fotosYaGuardadas = 0) {
     acumulados.forEach((file, idx) => {
       const div = document.createElement("div");
       div.className = "foto-thumb";
-      div.innerHTML = `<img src="${URL.createObjectURL(file)}" alt="nueva"><button type="button" class="foto-quitar" data-idx="${idx}" title="Quitar">◊</button>`;
+      div.innerHTML = `<img src="${URL.createObjectURL(file)}" alt="nueva"><button type="button" class="foto-quitar" data-idx="${idx}" title="Quitar">√ó</button>`;
       preview.appendChild(div);
     });
     if (contador) {
@@ -507,7 +495,7 @@ function conectarFotosPreview(fotosYaGuardadas = 0) {
     const cupo = Math.max(0, MAX_FOTOS - fotosYaGuardadas - acumulados.length);
     const nuevos = Array.from(lista || []).slice(0, cupo);
     if ((lista?.length || 0) > cupo) {
-      window.alert(`Solo se permiten ${MAX_FOTOS} fotografÌas en total.`);
+      window.alert(`Solo se permiten ${MAX_FOTOS} fotograf√≠as en total.`);
     }
     acumulados = acumulados.concat(nuevos);
     pintar();
@@ -546,7 +534,7 @@ function conectarMapaYGps(editando) {
         inputLat.value = lat.toFixed(6);
         inputLng.value = lng.toFixed(6);
         origenUbicacion = "mapa";
-        if (hint) hint.textContent = "UbicaciÛn marcada en el mapa";
+        if (hint) hint.textContent = "Ubicaci√≥n marcada en el mapa";
       },
       centroInicial,
       { calles: "f-btn-calles", satelital: "f-btn-satelital" }
@@ -571,14 +559,14 @@ function conectarMapaYGps(editando) {
 
   document.getElementById("f-btn-gps")?.addEventListener("click", () => {
     if (editando) {
-      window.alert("La ubicaciÛn no se modifica al editar un reporte ya verificado.");
+      window.alert("La ubicaci√≥n no se modifica al editar un reporte ya verificado.");
       return;
     }
     if (!navigator.geolocation) {
-      window.alert("Este dispositivo no permite geolocalizaciÛn.");
+      window.alert("Este dispositivo no permite geolocalizaci√≥n.");
       return;
     }
-    if (hint) hint.textContent = "Obteniendo ubicaciÛnÖ";
+    if (hint) hint.textContent = "Obteniendo ubicaci√≥n‚Ä¶";
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const lat = pos.coords.latitude;
@@ -587,10 +575,10 @@ function conectarMapaYGps(editando) {
         inputLng.value = lng.toFixed(6);
         actualizarMarcadorPicker(lat, lng);
         origenUbicacion = "gps";
-        if (hint) hint.textContent = "UbicaciÛn tomada del GPS del dispositivo";
+        if (hint) hint.textContent = "Ubicaci√≥n tomada del GPS del dispositivo";
       },
       (err) => {
-        window.alert("No se pudo obtener la ubicaciÛn: " + (err.message || "permiso denegado"));
+        window.alert("No se pudo obtener la ubicaci√≥n: " + (err.message || "permiso denegado"));
         if (hint) hint.textContent = "O marca el punto en el mapa";
       },
       { enableHighAccuracy: true, timeout: 15000 }
@@ -616,11 +604,6 @@ function leerCamposFormulario() {
     descripcion: document.getElementById("f-descripcion").value.trim(),
     hallazgos_checklist,
     observaciones_adicionales: document.getElementById("f-observaciones").value.trim(),
-    responsable_nombre: document.getElementById("f-responsable-nombre")?.value.trim() || "",
-    responsable_domicilio: document.getElementById("f-responsable-domicilio")?.value.trim() || "",
-    responsable_id_tipo: document.getElementById("f-responsable-id-tipo")?.value || "",
-    responsable_id_folio: document.getElementById("f-responsable-id-folio")?.value.trim() || "",
-    responsable_manifestacion: document.getElementById("f-responsable-manifestacion")?.value.trim() || "",
     sancion_infracciones,
     sancion_umas: document.getElementById("f-sancion-umas")?.value || "",
     sancion_observaciones: document.getElementById("f-sancion-obs")?.value.trim() || "",
@@ -630,7 +613,7 @@ function leerCamposFormulario() {
 }
 
 export function abrirFormularioReporte(onGuardado) {
-  abrirModal("?? InspecciÛn / reporte de quema", formInspeccionHtml(null));
+  abrirModal("üî• Inspecci√≥n / reporte de quema", formInspeccionHtml(null));
   const getOrigenUbicacion = conectarMapaYGps(false);
   const getArchivos = conectarFotosPreview(0);
   conectarCalculadoraUma();
@@ -640,12 +623,12 @@ export function abrirFormularioReporte(onGuardado) {
     const lat = Number(campos.lat);
     const lng = Number(campos.lng);
     if (!campos.lat || !campos.lng || Number.isNaN(lat) || Number.isNaN(lng)) {
-      window.alert("Marca la ubicaciÛn en el mapa o usa el GPS antes de guardar.");
+      window.alert("Marca la ubicaci√≥n en el mapa o usa el GPS antes de guardar.");
       return;
     }
     const btn = document.getElementById("f-verificar");
     btn.disabled = true;
-    btn.textContent = "GuardandoÖ";
+    btn.textContent = "Guardando‚Ä¶";
     try {
       const fechaHora = new Date();
       const folio = generarFolioInspeccion(fechaHora);
@@ -689,15 +672,15 @@ export function abrirFormularioReporte(onGuardado) {
       };
 
       const avisoFotos = avisos?.length
-        ? `<p class="geo-hint">Aviso: algunas fotos no se pudieron almacenar (${avisos.length}). El reporte sÌ quedÛ guardado.</p>`
+        ? `<p class="geo-hint">Aviso: algunas fotos no se pudieron almacenar (${avisos.length}). El reporte s√≠ qued√≥ guardado.</p>`
         : "";
 
       document.getElementById("f-resultado").innerHTML = `
-        <strong>Folio ${folio}</strong> ∑ Resultado: ${pillHtml(verificacion.resultado)}
+        <strong>Folio ${folio}</strong> ¬∑ Resultado: ${pillHtml(verificacion.resultado)}
         ${avisoFotos}
         <div class="form-acciones-fila" style="margin-top:10px">
-          <button type="button" class="btn btn-secondary" id="f-pdf-ahora">?? Acta de inspecciÛn</button>
-          <button type="button" class="btn btn-secondary" id="f-pdf-sancion-ahora">?? Acta de sanciÛn</button>
+          <button type="button" class="btn btn-secondary" id="f-pdf-ahora">üìã Acta de inspecci√≥n</button>
+          <button type="button" class="btn btn-secondary" id="f-pdf-sancion-ahora">‚öñÔ∏è Acta de sanci√≥n</button>
         </div>`;
       document.getElementById("f-pdf-ahora")?.addEventListener("click", () => {
         generarPdfInspeccion(reporteGuardado, verificacion.horno);
@@ -715,13 +698,13 @@ export function abrirFormularioReporte(onGuardado) {
       window.alert("No se pudo guardar el reporte: " + (err.message || err));
     } finally {
       btn.disabled = false;
-      btn.textContent = "?? Verificar y guardar";
+      btn.textContent = "üîç Verificar y guardar";
     }
   });
 }
 
 export function abrirFormularioEditarReporte(reporte, onGuardado, horno) {
-  abrirModal("?? Editar inspecciÛn / reporte", formInspeccionHtml(reporte));
+  abrirModal("‚úèÔ∏è Editar inspecci√≥n / reporte", formInspeccionHtml(reporte));
   conectarMapaYGps(true);
   conectarCalculadoraUma();
   const fotosExistentes = Array.isArray(reporte.fotos) ? reporte.fotos : [];

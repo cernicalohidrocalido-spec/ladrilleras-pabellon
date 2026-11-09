@@ -1,36 +1,36 @@
-/** Checklist fijo de hallazgos para inspección de ladrilleras. */
+/** Checklist fijo de hallazgos para inspecciÃ³n de ladrilleras. */
 export const OPCIONES_HALLAZGOS = [
-  { id: "quema_activa", label: "Quema activa al momento de la inspección" },
-  { id: "humo_visible", label: "Emisión visible de humo / partículas" },
-  { id: "combustible_no_autorizado", label: "Uso de combustible no autorizado (llanta, plástico, etc.)" },
+  { id: "quema_activa", label: "Quema activa al momento de la inspecciÃ³n" },
+  { id: "humo_visible", label: "EmisiÃ³n visible de humo / partÃ­culas" },
+  { id: "combustible_no_autorizado", label: "Uso de combustible no autorizado (llanta, plÃ¡stico, etc.)" },
   { id: "sin_permiso", label: "Sin permiso de quema vigente" },
-  { id: "fuera_horario", label: "Quema fuera de días u horario autorizado" },
+  { id: "fuera_horario", label: "Quema fuera de dÃ­as u horario autorizado" },
   { id: "horno_deteriorado", label: "Horno en mal estado o con riesgo de seguridad" },
-  { id: "residuos_combustible", label: "Residuos de combustión / basura en el predio" },
-  { id: "afectacion_vecinos", label: "Afectación reportada a vecinos / vía pública" },
+  { id: "residuos_combustible", label: "Residuos de combustiÃ³n / basura en el predio" },
+  { id: "afectacion_vecinos", label: "AfectaciÃ³n reportada a vecinos / vÃ­a pÃºblica" },
   { id: "cumple_condiciones", label: "Cumple las condiciones del permiso" },
 ];
 
 /**
  * Infracciones aplicables a control de quema / ladrilleras
- * (Ley de Ingresos del Municipio de Pabellón de Arteaga, ejercicio 2026).
+ * (Ley de Ingresos del Municipio de PabellÃ³n de Arteaga, ejercicio 2026).
  * Fuente: https://imbio.info/normativa-vigente/lectura.html?doc=ley-ingresos-2026
  */
 export const OPCIONES_SANCION = [
   {
     id: "c",
-    label: "c) Realice combustión de llantas;",
+    label: "c) Realice combustiÃ³n de llantas;",
   },
   {
     id: "f",
-    label: "f) Emita ostensiblemente contaminantes a la atmósfera, tales como humos, polvos, gases, vapores u olores;",
+    label: "f) Emita ostensiblemente contaminantes a la atmÃ³sfera, tales como humos, polvos, gases, vapores u olores;",
   },
 ];
 
 /** Rango legal de multa para estas infracciones. */
 export const SANCION_MULTA_MIN = 100;
 export const SANCION_MULTA_MAX = 1000;
-/** Monto sugerido por defecto al levantar acta de sanción (dentro del rango legal). */
+/** Monto sugerido por defecto al levantar acta de sanciÃ³n (dentro del rango legal). */
 export const SANCION_MULTA_SUGERIDA = 500;
 
 /** Valor diario UMA 2026 (INEGI, vigente desde 1 feb 2026). */
@@ -38,10 +38,10 @@ export const UMA_DIARIA_MXN = 117.31;
 export const UMA_VIGENCIA = "1 de febrero de 2026";
 
 export const SANCION_MULTA_TEXTO =
-  "Se sancionará con multa de 100 a 1,000 UMA (Unidad de Medida y Actualización), a su valor vigente al momento de cometer la infracción, a quien incurra en las conductas señaladas, conforme a la Ley de Ingresos del Municipio de Pabellón de Arteaga, ejercicio fiscal 2026.";
+  "Se sancionarÃ¡ con multa de 100 a 1,000 UMA (Unidad de Medida y ActualizaciÃ³n), a su valor vigente al momento de cometer la infracciÃ³n, a quien incurra en las conductas seÃ±aladas, conforme a la Ley de Ingresos del Municipio de PabellÃ³n de Arteaga, ejercicio fiscal 2026.";
 
 export const SANCION_PLAZO_PAGO =
-  "El infractor cuenta con 5 (cinco) días hábiles para realizar el pago de la multa en la Tesorería Municipal del H. Ayuntamiento de Pabellón de Arteaga, Aguascalientes.";
+  "El infractor cuenta con 5 (cinco) dÃ­as hÃ¡biles para realizar el pago de la multa en la TesorerÃ­a Municipal del H. Ayuntamiento de PabellÃ³n de Arteaga, Aguascalientes.";
 
 export function calcularMultaPesos(umas, valorUma = UMA_DIARIA_MXN) {
   const n = Number(umas);
@@ -57,7 +57,7 @@ export function formatPesosMXN(monto) {
   }).format(Number(monto) || 0);
 }
 
-/** Convierte un monto en pesos a letra (español México). */
+/** Convierte un monto en pesos a letra (espaÃ±ol MÃ©xico). */
 export function numeroALetrasPesos(monto) {
   const total = Math.round((Number(monto) || 0) * 100);
   const enteros = Math.floor(total / 100);
@@ -74,9 +74,9 @@ function _numeroALetras(n) {
   const c = ["", "ciento", "doscientos", "trescientos", "cuatrocientos", "quinientos", "seiscientos", "setecientos", "ochocientos", "novecientos"];
   const especiales = {
     10: "diez", 11: "once", 12: "doce", 13: "trece", 14: "catorce", 15: "quince",
-    16: "dieciséis", 17: "diecisiete", 18: "dieciocho", 19: "diecinueve",
-    20: "veinte", 21: "veintiún", 22: "veintidós", 23: "veintitrés", 24: "veinticuatro",
-    25: "veinticinco", 26: "veintiséis", 27: "veintisiete", 28: "veintiocho", 29: "veintinueve",
+    16: "diecisÃ©is", 17: "diecisiete", 18: "dieciocho", 19: "diecinueve",
+    20: "veinte", 21: "veintiÃºn", 22: "veintidÃ³s", 23: "veintitrÃ©s", 24: "veinticuatro",
+    25: "veinticinco", 26: "veintisÃ©is", 27: "veintisiete", 28: "veintiocho", 29: "veintinueve",
   };
 
   function hasta999(num) {
@@ -92,7 +92,7 @@ function _numeroALetras(n) {
     const uni = resto % 10;
     if (dec === 0) return `${out} ${u[uni]}`.trim();
     if (dec === 1) return `${out} ${especiales[resto] || d[dec]}`.trim();
-    if (dec === 2 && uni > 0) return `${out} veinti${u[uni]}`.trim().replace("veintiun", "veintiún");
+    if (dec === 2 && uni > 0) return `${out} veinti${u[uni]}`.trim().replace("veintiun", "veintiÃºn");
     return `${out} ${d[dec]}${uni ? ` y ${u[uni]}` : ""}`.trim();
   }
 
@@ -108,13 +108,13 @@ function _numeroALetras(n) {
   }
   const millones = Math.floor(n / 1000000);
   const resto = n % 1000000;
-  const pref = millones === 1 ? "un millón" : `${hasta999(millones)} millones`;
+  const pref = millones === 1 ? "un millÃ³n" : `${hasta999(millones)} millones`;
   if (!resto) return pref;
   if (resto < 1000) return `${pref} ${hasta999(resto)}`;
   return `${pref} ${_numeroALetras(resto)}`;
 }
 
-// --- Cálculo de estado de un permiso a partir de sus fechas ---
+// --- CÃ¡lculo de estado de un permiso a partir de sus fechas ---
 // Devuelve 'vigente' | 'por_vencer' | 'vencido'
 export function calcularEstadoPermiso(permiso, ahora = new Date()) {
   const fin = permiso.fecha_vigencia_fin?.toDate
@@ -145,7 +145,7 @@ export function pillHtml(estado) {
   return `<span class="pill ${cls}">${label}</span>`;
 }
 
-// Posición (0-100%) del marcador en el gauge de temperatura
+// PosiciÃ³n (0-100%) del marcador en el gauge de temperatura
 export function gaugeHtml(estado) {
   const posMap = { vigente: 10, por_vencer: 50, vencido: 90 };
   const pos = posMap[estado] ?? 50;
@@ -153,7 +153,7 @@ export function gaugeHtml(estado) {
 }
 
 export function formatFecha(ts) {
-  if (!ts) return "—";
+  if (!ts) return "â€”";
   const d = ts.toDate ? ts.toDate() : new Date(ts);
   return d.toLocaleDateString("es-MX", { year: "numeric", month: "short", day: "numeric" });
 }
@@ -167,18 +167,18 @@ export function toMillis(ts) {
   return Number.isNaN(d.getTime()) ? 0 : d.getTime();
 }
 
-/** Fecha de registro del permiso: registro ? solicitud ? autorización ? inicio de vigencia. */
+/** Fecha de registro del permiso: registro â†’ solicitud â†’ autorizaciÃ³n â†’ inicio de vigencia. */
 export function fechaRegistroPermiso(permiso) {
   return permiso?.fecha_registro || permiso?.fecha_solicitud || permiso?.fecha_autorizacion || permiso?.fecha_vigencia_inicio || null;
 }
 
 export function formatFechaHora(ts) {
-  if (!ts) return "—";
+  if (!ts) return "â€”";
   const d = ts.toDate ? ts.toDate() : new Date(ts);
   return d.toLocaleString("es-MX", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
-// --- Modal genérico ---
+// --- Modal genÃ©rico ---
 const overlay = document.getElementById("modal-overlay");
 const modalTitle = document.getElementById("modal-title");
 const modalBody = document.getElementById("modal-body");
@@ -207,9 +207,9 @@ export function confirmarAccion(mensaje) {
 export function accionesHtml(id) {
   return `
     <div class="row-actions">
-      <button class="row-btn" data-action="ver" data-id="${id}" title="Ver detalle">???</button>
-      <button class="row-btn" data-action="editar" data-id="${id}" title="Editar">??</button>
-      <button class="row-btn row-btn-danger" data-action="eliminar" data-id="${id}" title="Eliminar">???</button>
+      <button class="row-btn" data-action="ver" data-id="${id}" title="Ver detalle">ğŸ‘ï¸</button>
+      <button class="row-btn" data-action="editar" data-id="${id}" title="Editar">âœï¸</button>
+      <button class="row-btn row-btn-danger" data-action="eliminar" data-id="${id}" title="Eliminar">ğŸ—‘ï¸</button>
     </div>
   `;
 }
@@ -217,8 +217,8 @@ export function accionesHtml(id) {
 export function accionesHtmlSimple(id) {
   return `
     <div class="row-actions">
-      <button class="row-btn" data-action="editar" data-id="${id}" title="Editar">??</button>
-      <button class="row-btn row-btn-danger" data-action="eliminar" data-id="${id}" title="Eliminar">???</button>
+      <button class="row-btn" data-action="editar" data-id="${id}" title="Editar">âœï¸</button>
+      <button class="row-btn row-btn-danger" data-action="eliminar" data-id="${id}" title="Eliminar">ğŸ—‘ï¸</button>
     </div>
   `;
 }
@@ -226,10 +226,10 @@ export function accionesHtmlSimple(id) {
 export function accionesHtmlReporte(id) {
   return `
     <div class="row-actions">
-      <button class="row-btn" data-action="pdf" data-id="${id}" title="Acta de inspección (PDF)">??</button>
-      <button class="row-btn" data-action="pdf-sancion" data-id="${id}" title="Acta de sanción (PDF)">??</button>
-      <button class="row-btn" data-action="editar" data-id="${id}" title="Editar">??</button>
-      <button class="row-btn row-btn-danger" data-action="eliminar" data-id="${id}" title="Eliminar">???</button>
+      <button class="row-btn" data-action="pdf" data-id="${id}" title="Acta de inspecciÃ³n (PDF)">ğŸ“‹</button>
+      <button class="row-btn" data-action="pdf-sancion" data-id="${id}" title="Acta de sanciÃ³n (PDF)">âš–ï¸</button>
+      <button class="row-btn" data-action="editar" data-id="${id}" title="Editar">âœï¸</button>
+      <button class="row-btn row-btn-danger" data-action="eliminar" data-id="${id}" title="Eliminar">ğŸ—‘ï¸</button>
     </div>
   `;
 }
