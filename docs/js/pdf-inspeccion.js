@@ -11,7 +11,7 @@ import {
   formatPesosMXN,
   numeroALetrasPesos,
   SANCION_PLAZO_PAGO,
-} from "./utils.js?v=30";
+} from "./utils.js?v=31";
 
 const ETIQUETA_RESULTADO = {
   con_permiso_vigente: "Con permiso vigente",
@@ -234,7 +234,7 @@ function fotosCompactasHtml(fotos) {
   return `<div class="${clase}">${fotos
     .map(
       (f, i) => `<figure>
-      <img class="evidencia" src="${esc(f.url)}" alt="Evidencia ${i + 1}">
+      <img class="evidencia" src="${esc(f.url)}" alt="Fotografía ${i + 1}" title="Fotografía ${i + 1}">
       <figcaption>Fotografía ${i + 1}</figcaption>
     </figure>`
     )

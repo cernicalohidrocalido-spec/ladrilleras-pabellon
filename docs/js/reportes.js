@@ -1,17 +1,17 @@
 import {
   db, storage, collection, addDoc, updateDoc, deleteDoc, getDocs, doc,
   Timestamp, GeoPoint, ref, uploadBytes, getDownloadURL,
-} from "./db.js?v=30";
+} from "./db.js?v=31";
 import {
   abrirModal, cerrarModal, pillHtml, formatFechaHora, distanciaMetros,
   calcularEstadoPermiso, accionesHtmlReporte, OPCIONES_HALLAZGOS,
   OPCIONES_SANCION, SANCION_MULTA_TEXTO, SANCION_MULTA_MIN, SANCION_MULTA_MAX, SANCION_MULTA_SUGERIDA,
   UMA_DIARIA_MXN, UMA_VIGENCIA, calcularMultaPesos, formatPesosMXN, numeroALetrasPesos, SANCION_PLAZO_PAGO,
-} from "./utils.js?v=30";
-import { listarHornos } from "./hornos.js?v=30";
-import { listarPermisos } from "./permisos.js?v=30";
-import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=30";
-import { generarPdfInspeccion, generarPdfSancion } from "./pdf-inspeccion.js?v=30";
+} from "./utils.js?v=31";
+import { listarHornos } from "./hornos.js?v=31";
+import { listarPermisos } from "./permisos.js?v=31";
+import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=31";
+import { generarPdfInspeccion, generarPdfSancion } from "./pdf-inspeccion.js?v=31";
 
 const reportesCol = collection(db, "reportes_quema");
 const RADIO_MATCH_METROS = 150;
@@ -246,14 +246,14 @@ async function subirFotosReporte(reporteId, archivos) {
           "Storage no respondió a tiempo"
         );
         const url = await conTimeout(getDownloadURL(storageRef), 8000, "No se obtuvo URL de la foto");
-        subidas.push({ url, nombre: file.name || nombre, contentType: "image/jpeg", origen: "storage" });
+        subidas.push({ url, nombre: `Fotografía ${subidas.length + 1}`, contentType: "image/jpeg", origen: "storage" });
       } catch (errStorage) {
         // Miniatura ligera para no bloquear ni reventar el documento de Firestore.
         console.warn("Storage no disponible:", errStorage?.message || errStorage);
         const mini = await comprimirImagen(file, 640, 0.55);
         const dataUrl = await blobADataUrl(mini);
         if (typeof dataUrl === "string" && dataUrl.length < 450000) {
-          subidas.push({ url: dataUrl, nombre: file.name || nombre, contentType: "image/jpeg", origen: "embebida" });
+          subidas.push({ url: dataUrl, nombre: `Fotografía ${subidas.length + 1}`, contentType: "image/jpeg", origen: "embebida" });
         } else {
           avisos.push(file.name || nombre);
         }
