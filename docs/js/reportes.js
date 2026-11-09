@@ -1,19 +1,31 @@
 ﻿import {
   db, storage, collection, addDoc, updateDoc, deleteDoc, getDocs, doc,
   Timestamp, GeoPoint, ref, uploadBytes, getDownloadURL,
-} from "./db.js?v=21";
+} from "./db.js?v=22";
 import {
   abrirModal, cerrarModal, pillHtml, formatFechaHora, distanciaMetros,
   calcularEstadoPermiso, accionesHtmlReporte, OPCIONES_HALLAZGOS,
-} from "./utils.js?v=21";
-import { listarHornos } from "./hornos.js?v=21";
-import { listarPermisos } from "./permisos.js?v=21";
-import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=21";
-import { generarPdfInspeccion } from "./pdf-inspeccion.js?v=21";
+} from "./utils.js?v=22";
+import { listarHornos } from "./hornos.js?v=22";
+import { listarPermisos } from "./permisos.js?v=22";
+import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=22";
+import { generarPdfInspeccion } from "./pdf-inspeccion.js?v=22";
 
 const reportesCol = collection(db, "reportes_quema");
 const RADIO_MATCH_METROS = 150;
 const MAX_FOTOS = 5;
+
+/** Folio institucional: INSP-AAAA-MMDD-HHMMSS */
+export function generarFolioInspeccion(fecha = new Date()) {
+  const y = fecha.getFullYear();
+  const m = String(fecha.getMonth() + 1).padStart(2, "0");
+  const d = String(fecha.getDate()).padStart(2, "0");
+  const hh = String(fecha.getHours()).padStart(2, "0");
+  const mm = String(fecha.getMinutes()).padStart(2, "0");
+  const ss = String(fecha.getSeconds()).padStart(2, "0");
+  const rnd = String(Math.floor(Math.random() * 90) + 10);
+  return `INSP-${y}-${m}${d}-${hh}${mm}${ss}${rnd}`;
+}
 
 function checklistHallazgosHtml(seleccionados = []) {
   const set = new Set(seleccionados || []);
@@ -141,7 +153,9 @@ async function subirFotosReporte(reporteId, archivos) {
 }
 
 export async function crearReporte(data, verificacion, archivosFoto = []) {
+  const folio = data.folio || generarFolioInspeccion(data.fechaHora || new Date());
   const docRef = await addDoc(reportesCol, {
+    folio,
     fecha_hora_reporte: Timestamp.fromDate(data.fechaHora),
     origen_reporte: data.origen,
     ubicacion_reportada: new GeoPoint(Number(data.lat), Number(data.lng)),
@@ -166,9 +180,9 @@ export async function crearReporte(data, verificacion, archivosFoto = []) {
   if (archivosFoto.length) {
     const fotos = await subirFotosReporte(docRef.id, archivosFoto);
     await updateDoc(docRef, { fotos });
-    return { id: docRef.id, fotos };
+    return { id: docRef.id, folio, fotos };
   }
-  return { id: docRef.id, fotos: [] };
+  return { id: docRef.id, folio, fotos: [] };
 }
 
 export async function actualizarReporte(id, data, archivosFoto = [], fotosExistentes = []) {
@@ -200,7 +214,7 @@ export async function eliminarReporte(id) {
 export function renderTablaReportes(reportes, hornosById) {
   const tbody = document.querySelector("#tabla-reportes tbody");
   if (!reportes.length) {
-    tbody.innerHTML = `<tr><td colspan="6" style="color:var(--text-muted);text-align:center;padding:24px">Sin reportes registrados.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" style="color:var(--text-muted);text-align:center;padding:24px">Sin reportes registrados.</td></tr>`;
     return;
   }
   tbody.innerHTML = reportes
@@ -209,6 +223,7 @@ export function renderTablaReportes(reportes, hornosById) {
       const lugar = r.nucleo_localidad || r.direccion_reportada || "—";
       return `
       <tr>
+        <td style="font-family:var(--font-mono);font-weight:600">${r.folio || "—"}</td>
         <td>${formatFechaHora(r.fecha_hora_reporte)}</td>
         <td>${r.origen_reporte || "—"}</td>
         <td>${lugar}</td>
@@ -223,97 +238,148 @@ export function renderTablaReportes(reportes, hornosById) {
 function formInspeccionHtml(reporte) {
   const editando = Boolean(reporte);
   const fotosExistentes = Array.isArray(reporte?.fotos) ? reporte.fotos : [];
+  const folioMostrar = reporte?.folio || (editando ? "—" : "Se asignará al guardar");
   return `
-    <label>Origen del reporte
-      <select id="f-origen">
-        ${["patrulla", "ciudadano", "airepuro", "anónimo", "inspección"].map(
-          (o) => `<option ${(!editando && o === "patrulla") || reporte?.origen_reporte === o ? "selected" : ""}>${o}</option>`
-        ).join("")}
-      </select>
-    </label>
-    <label>Núcleo de ladrilleras o localidad
-      <input type="text" id="f-nucleo" placeholder="Ej. Núcleo Las Ánimas, Ojo Zarco…" value="${reporte?.nucleo_localidad || ""}">
-    </label>
-    <label>Dirección aproximada
-      <input type="text" id="f-direccion" value="${reporte?.direccion_reportada || ""}">
-    </label>
+    <div class="form-inspeccion">
+      <div class="form-inspeccion-header">
+        <img src="assets/logo-imbio.jpg" alt="IMBIO" class="form-inspeccion-logo">
+        <div>
+          <strong>IMBIO · Control de Quema</strong>
+          <span>Instituto Municipal de Biodiversidad y Protección Ambiental</span>
+          <span>H. Ayuntamiento de Pabellón de Arteaga</span>
+        </div>
+      </div>
 
-    <label>Ubicación de la inspección</label>
-    <div class="geo-toolbar">
-      <button type="button" class="btn btn-secondary" id="f-btn-gps">📍 Usar mi ubicación</button>
-      <span class="geo-hint" id="f-geo-hint">O marca el punto en el mapa</span>
-    </div>
-    <div class="capas-toolbar">
-      <button type="button" class="capas-btn activa" id="f-btn-calles">Calles</button>
-      <button type="button" class="capas-btn" id="f-btn-satelital">Satélite</button>
-    </div>
-    <div id="f-mapa-picker" class="picker-map picker-map-compact"></div>
-    <div class="field-row">
-      <label>Latitud
-        <input type="text" id="f-lat" placeholder="22.1234" value="${reporte?.ubicacion_reportada?.latitude ?? ""}" ${editando ? "readonly" : ""}>
+      <div class="folio-inspeccion-box">
+        <span>Folio de inspección</span>
+        <strong id="f-folio-display">${folioMostrar}</strong>
+      </div>
+
+      <label>Origen del reporte
+        <select id="f-origen">
+          ${["patrulla", "ciudadano", "airepuro", "anónimo", "inspección"].map(
+            (o) => `<option ${(!editando && o === "patrulla") || reporte?.origen_reporte === o ? "selected" : ""}>${o}</option>`
+          ).join("")}
+        </select>
       </label>
-      <label>Longitud
-        <input type="text" id="f-lng" placeholder="-102.1234" value="${reporte?.ubicacion_reportada?.longitude ?? ""}" ${editando ? "readonly" : ""}>
+      <label>Núcleo de ladrilleras o localidad
+        <input type="text" id="f-nucleo" placeholder="Ej. Núcleo Las Ánimas, Ojo Zarco…" value="${reporte?.nucleo_localidad || ""}">
       </label>
-    </div>
-    ${editando ? `<p class="section-sub">La ubicación y el resultado de verificación no cambian al editar.</p>` : ""}
+      <label>Dirección aproximada
+        <input type="text" id="f-direccion" value="${reporte?.direccion_reportada || ""}">
+      </label>
 
-    <label>Descripción de la inspección
-      <textarea id="f-descripcion" rows="2">${reporte?.descripcion || ""}</textarea>
-    </label>
-    ${checklistHallazgosHtml(reporte?.hallazgos_checklist || [])}
-    <label>Observaciones adicionales
-      <textarea id="f-observaciones" rows="2" placeholder="Detalle libre del inspector…">${reporte?.observaciones_adicionales || ""}</textarea>
-    </label>
-    <label>Atendido por (inspector)
-      <input type="text" id="f-atendido" value="${reporte?.atendido_por || ""}">
-    </label>
-    <label>Seguimiento / acción tomada
-      <textarea id="f-seguimiento" rows="2">${reporte?.seguimiento || ""}</textarea>
-    </label>
+      <label>Ubicación de la inspección</label>
+      <div class="geo-toolbar">
+        <button type="button" class="btn btn-secondary" id="f-btn-gps">📍 Usar mi ubicación</button>
+        <span class="geo-hint" id="f-geo-hint">O marca el punto en el mapa</span>
+      </div>
+      <div class="capas-toolbar">
+        <button type="button" class="capas-btn activa" id="f-btn-calles">Calles</button>
+        <button type="button" class="capas-btn" id="f-btn-satelital">Satélite</button>
+      </div>
+      <div id="f-mapa-picker" class="picker-map picker-map-compact"></div>
+      <div class="field-row">
+        <label>Latitud
+          <input type="text" id="f-lat" placeholder="22.1234" value="${reporte?.ubicacion_reportada?.latitude ?? ""}" ${editando ? "readonly" : ""}>
+        </label>
+        <label>Longitud
+          <input type="text" id="f-lng" placeholder="-102.1234" value="${reporte?.ubicacion_reportada?.longitude ?? ""}" ${editando ? "readonly" : ""}>
+        </label>
+      </div>
+      ${editando ? `<p class="section-sub">La ubicación y el resultado de verificación no cambian al editar.</p>` : ""}
 
-    <label>Fotografías de la inspección (máx. ${MAX_FOTOS})
-      <input type="file" id="f-fotos" accept="image/*" capture="environment" multiple>
-    </label>
-    <div class="fotos-preview" id="f-fotos-preview">
-      ${fotosExistentes
-        .map(
-          (f) => `<div class="foto-thumb"><img src="${f.url}" alt="foto"></div>`
-        )
-        .join("")}
-    </div>
+      <label>Descripción de la inspección
+        <textarea id="f-descripcion" rows="2">${reporte?.descripcion || ""}</textarea>
+      </label>
+      ${checklistHallazgosHtml(reporte?.hallazgos_checklist || [])}
+      <label>Observaciones adicionales
+        <textarea id="f-observaciones" rows="2" placeholder="Detalle libre del inspector…">${reporte?.observaciones_adicionales || ""}</textarea>
+      </label>
+      <label>Atendido por (inspector)
+        <input type="text" id="f-atendido" value="${reporte?.atendido_por || ""}">
+      </label>
+      <label>Seguimiento / acción tomada
+        <textarea id="f-seguimiento" rows="2">${reporte?.seguimiento || ""}</textarea>
+      </label>
 
-    <div class="form-acciones-fila">
-      <button class="btn btn-primary" id="f-verificar">${editando ? "💾 Guardar cambios" : "🔍 Verificar y guardar"}</button>
-      ${editando ? `<button type="button" class="btn btn-secondary" id="f-pdf">📄 Generar PDF</button>` : ""}
+      <div class="fotos-bloque">
+        <div class="hallazgos-label">Fotografías de la inspección (máx. ${MAX_FOTOS})</div>
+        <div class="fotos-acciones">
+          <button type="button" class="btn btn-primary" id="f-btn-camara">📷 Tomar foto</button>
+          <button type="button" class="btn btn-secondary" id="f-btn-galeria">🖼️ Galería</button>
+        </div>
+        <input type="file" id="f-fotos-camara" accept="image/*" capture="environment" hidden>
+        <input type="file" id="f-fotos-galeria" accept="image/*" multiple hidden>
+        <div class="fotos-preview" id="f-fotos-preview">
+          ${fotosExistentes
+            .map(
+              (f) => `<div class="foto-thumb existente"><img src="${f.url}" alt="foto"></div>`
+            )
+            .join("")}
+        </div>
+        <p class="geo-hint" id="f-fotos-count">${fotosExistentes.length} foto(s) guardada(s)</p>
+      </div>
+
+      <div class="form-acciones-fila">
+        <button class="btn btn-primary" id="f-verificar">${editando ? "💾 Guardar cambios" : "🔍 Verificar y guardar"}</button>
+        ${editando ? `<button type="button" class="btn btn-secondary" id="f-pdf">📄 Generar PDF</button>` : ""}
+      </div>
+      <div id="f-resultado" style="margin-top:6px;"></div>
     </div>
-    <div id="f-resultado" style="margin-top:6px;"></div>
   `;
 }
 
-function conectarFotosPreview(inputId, previewId, fotosYaGuardadas = 0) {
-  const input = document.getElementById(inputId);
-  const preview = document.getElementById(previewId);
+function conectarFotosPreview(fotosYaGuardadas = 0) {
+  const preview = document.getElementById("f-fotos-preview");
+  const camara = document.getElementById("f-fotos-camara");
+  const galeria = document.getElementById("f-fotos-galeria");
+  const contador = document.getElementById("f-fotos-count");
   const serverHtml = preview.innerHTML;
-  input._archivosSeleccionados = [];
+  let acumulados = [];
 
-  input.addEventListener("change", () => {
-    const cupo = Math.max(0, MAX_FOTOS - fotosYaGuardadas);
-    const seleccionados = Array.from(input.files || []).slice(0, cupo);
-    if ((input.files?.length || 0) > cupo) {
-      window.alert(`Solo se permiten ${MAX_FOTOS} fotografías en total.`);
-    }
-    input._archivosSeleccionados = seleccionados;
+  function pintar() {
     preview.innerHTML = serverHtml;
-    seleccionados.forEach((file) => {
+    acumulados.forEach((file, idx) => {
       const div = document.createElement("div");
       div.className = "foto-thumb";
-      div.innerHTML = `<img src="${URL.createObjectURL(file)}" alt="nueva">`;
+      div.innerHTML = `<img src="${URL.createObjectURL(file)}" alt="nueva"><button type="button" class="foto-quitar" data-idx="${idx}" title="Quitar">×</button>`;
       preview.appendChild(div);
     });
+    if (contador) {
+      contador.textContent = `${fotosYaGuardadas + acumulados.length} de ${MAX_FOTOS} foto(s)`;
+    }
+    preview.querySelectorAll(".foto-quitar").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        acumulados.splice(Number(btn.dataset.idx), 1);
+        pintar();
+      });
+    });
+  }
+
+  function agregarArchivos(lista) {
+    const cupo = Math.max(0, MAX_FOTOS - fotosYaGuardadas - acumulados.length);
+    const nuevos = Array.from(lista || []).slice(0, cupo);
+    if ((lista?.length || 0) > cupo) {
+      window.alert(`Solo se permiten ${MAX_FOTOS} fotografías en total.`);
+    }
+    acumulados = acumulados.concat(nuevos);
+    pintar();
+  }
+
+  document.getElementById("f-btn-camara")?.addEventListener("click", () => camara.click());
+  document.getElementById("f-btn-galeria")?.addEventListener("click", () => galeria.click());
+  camara?.addEventListener("change", () => {
+    if (camara.files?.length) agregarArchivos(camara.files);
+    camara.value = "";
+  });
+  galeria?.addEventListener("change", () => {
+    if (galeria.files?.length) agregarArchivos(galeria.files);
+    galeria.value = "";
   });
 
-  return () => input._archivosSeleccionados || [];
+  pintar();
+  return () => acumulados;
 }
 
 function conectarMapaYGps(editando) {
@@ -409,7 +475,7 @@ function leerCamposFormulario() {
 export function abrirFormularioReporte(onGuardado) {
   abrirModal("🔥 Inspección / reporte de quema", formInspeccionHtml(null));
   const getOrigenUbicacion = conectarMapaYGps(false);
-  const getArchivos = conectarFotosPreview("f-fotos", "f-fotos-preview", 0);
+  const getArchivos = conectarFotosPreview(0);
 
   document.getElementById("f-verificar").addEventListener("click", async () => {
     const campos = leerCamposFormulario();
@@ -424,6 +490,10 @@ export function abrirFormularioReporte(onGuardado) {
     btn.textContent = "Guardando…";
     try {
       const fechaHora = new Date();
+      const folio = generarFolioInspeccion(fechaHora);
+      const display = document.getElementById("f-folio-display");
+      if (display) display.textContent = folio;
+
       const verificacion = await verificarReporte({ lat, lng, fechaHora });
       document.getElementById("f-resultado").innerHTML =
         `Resultado: ${pillHtml(verificacion.resultado)}`;
@@ -431,6 +501,7 @@ export function abrirFormularioReporte(onGuardado) {
       const { id, fotos } = await crearReporte(
         {
           ...campos,
+          folio,
           fechaHora,
           origen_ubicacion: getOrigenUbicacion(),
         },
@@ -440,6 +511,7 @@ export function abrirFormularioReporte(onGuardado) {
 
       const reporteGuardado = {
         id,
+        folio,
         fecha_hora_reporte: fechaHora,
         origen_reporte: campos.origen,
         nucleo_localidad: campos.nucleo_localidad,
@@ -456,7 +528,7 @@ export function abrirFormularioReporte(onGuardado) {
       };
 
       document.getElementById("f-resultado").innerHTML = `
-        Resultado: ${pillHtml(verificacion.resultado)}
+        <strong>Folio ${folio}</strong> · Resultado: ${pillHtml(verificacion.resultado)}
         <div class="form-acciones-fila" style="margin-top:10px">
           <button type="button" class="btn btn-secondary" id="f-pdf-ahora">📄 Generar PDF de inspección</button>
         </div>`;
@@ -481,7 +553,7 @@ export function abrirFormularioEditarReporte(reporte, onGuardado, horno) {
   abrirModal("✏️ Editar inspección / reporte", formInspeccionHtml(reporte));
   conectarMapaYGps(true);
   const fotosExistentes = Array.isArray(reporte.fotos) ? reporte.fotos : [];
-  const getArchivos = conectarFotosPreview("f-fotos", "f-fotos-preview", fotosExistentes.length);
+  const getArchivos = conectarFotosPreview(fotosExistentes.length);
 
   document.getElementById("f-pdf")?.addEventListener("click", () => {
     generarPdfInspeccion(reporte, horno);

@@ -1,4 +1,4 @@
-﻿import { calcularEstadoPermiso, formatFecha, formatFechaHora } from "./utils.js?v=21";
+﻿import { calcularEstadoPermiso, formatFecha, formatFechaHora } from "./utils.js?v=22";
 
 const ETIQUETA_ESTADO = {
   vigente: "Vigente",
@@ -63,6 +63,7 @@ export function exportarReportes(reportes, hornosById) {
   const filas = reportes.map((r) => {
     const horno = hornosById[r.horno_id_identificado?.id];
     return {
+      "Folio": r.folio || "",
       "Fecha y hora": formatFechaHora(r.fecha_hora_reporte),
       "Origen": r.origen_reporte || "",
       "Núcleo / localidad": r.nucleo_localidad || "",

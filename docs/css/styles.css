@@ -471,6 +471,108 @@ h1 {
   font-size: 13px;
 }
 
+/* Formulario de inspección: tipografía institucional más grande */
+.modal:has(.form-inspeccion) {
+  width: min(720px, 96vw);
+}
+.modal:has(.form-inspeccion) .modal-header h2 {
+  font-size: 18px;
+}
+.form-inspeccion {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-size: 16px;
+}
+.form-inspeccion-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: #f0f4f9;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.form-inspeccion-logo {
+  width: 72px;
+  height: auto;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid var(--border);
+  padding: 3px;
+}
+.form-inspeccion-header strong {
+  display: block;
+  color: var(--navy-dark);
+  font-size: 15px;
+}
+.form-inspeccion-header span {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+.folio-inspeccion-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid #c8d6e5;
+  border-radius: 10px;
+  background: #eef3f8;
+}
+.folio-inspeccion-box span {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--text-muted);
+}
+.folio-inspeccion-box strong {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: var(--navy-dark);
+}
+.form-inspeccion label,
+.form-inspeccion .hallazgos-label {
+  font-size: 15px !important;
+  color: var(--text) !important;
+  font-weight: 600;
+}
+.form-inspeccion input,
+.form-inspeccion select,
+.form-inspeccion textarea {
+  font-size: 16px !important;
+  padding: 12px 14px !important;
+  min-height: 46px;
+}
+.form-inspeccion textarea { min-height: 72px; }
+.form-inspeccion .check-row {
+  font-size: 15px !important;
+  font-weight: 500 !important;
+}
+.form-inspeccion .btn {
+  font-size: 15px;
+  padding: 12px 16px;
+}
+.fotos-bloque { display: flex; flex-direction: column; gap: 8px; }
+.fotos-acciones { display: flex; flex-wrap: wrap; gap: 8px; }
+.foto-thumb { position: relative; }
+.foto-quitar {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(178, 58, 42, 0.9);
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
 .picker-map {
   height: 380px;
   width: 100%;

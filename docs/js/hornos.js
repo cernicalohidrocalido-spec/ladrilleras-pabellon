@@ -1,6 +1,6 @@
-﻿import { db, collection, doc, addDoc, updateDoc, deleteDoc, getDocs, Timestamp, GeoPoint } from "./db.js?v=21";
-import { abrirModal, cerrarModal, accionesHtml, formatFecha, pillHtml } from "./utils.js?v=21";
-import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=21";
+﻿import { db, collection, doc, addDoc, updateDoc, deleteDoc, getDocs, Timestamp, GeoPoint } from "./db.js?v=22";
+import { abrirModal, cerrarModal, accionesHtml, formatFecha, pillHtml } from "./utils.js?v=22";
+import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=22";
 
 const hornosCol = collection(db, "hornos");
 

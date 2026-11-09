@@ -1,4 +1,4 @@
-﻿import { auth, db, doc, getDoc, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "./db.js?v=21";
+﻿import { auth, db, doc, getDoc, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "./db.js?v=22";
 
 const loginOverlay = document.getElementById("login-overlay");
 const appRoot = document.getElementById("app-root");
