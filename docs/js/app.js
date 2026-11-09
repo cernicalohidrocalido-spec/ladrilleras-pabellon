@@ -1,9 +1,9 @@
-﻿import { listarHornos, renderTablaHornos, abrirFormularioHorno, eliminarHorno, abrirDetalleHorno } from "./hornos.js?v=23";
-import { listarPermisos, renderTablaPermisos, abrirFormularioPermiso, eliminarPermiso, ordenarPermisos } from "./permisos.js?v=23";
-import { listarReportes, renderTablaReportes, abrirFormularioReporte, abrirFormularioEditarReporte, eliminarReporte, generarPdfInspeccion } from "./reportes.js?v=23";
-import { pintarHornosEnMapa, conectarFiltrosMapa, enfocarHornoEnMapa } from "./mapa.js?v=23";
-import { calcularEstadoPermiso, pillHtml, formatFecha, confirmarAccion } from "./utils.js?v=23";
-import { exportarHornos, exportarPermisos, exportarReportes } from "./exportar.js?v=23";
+﻿import { listarHornos, renderTablaHornos, abrirFormularioHorno, eliminarHorno, abrirDetalleHorno } from "./hornos.js?v=24";
+import { listarPermisos, renderTablaPermisos, abrirFormularioPermiso, eliminarPermiso, ordenarPermisos } from "./permisos.js?v=24";
+import { listarReportes, renderTablaReportes, abrirFormularioReporte, abrirFormularioEditarReporte, eliminarReporte, generarPdfInspeccion, generarPdfSancion } from "./reportes.js?v=24";
+import { pintarHornosEnMapa, conectarFiltrosMapa, enfocarHornoEnMapa } from "./mapa.js?v=24";
+import { calcularEstadoPermiso, pillHtml, formatFecha, confirmarAccion } from "./utils.js?v=24";
+import { exportarHornos, exportarPermisos, exportarReportes } from "./exportar.js?v=24";
 
 let sortPermisos = { campo: "registro", dir: "desc" };
 
@@ -311,6 +311,8 @@ document.querySelector("#tabla-reportes tbody").addEventListener("click", async 
 
   if (btn.dataset.action === "pdf") {
     generarPdfInspeccion(reporte, horno);
+  } else if (btn.dataset.action === "pdf-sancion") {
+    generarPdfSancion(reporte, horno);
   } else if (btn.dataset.action === "editar") {
     abrirFormularioEditarReporte(reporte, cargarTodo, horno);
   } else if (btn.dataset.action === "eliminar") {

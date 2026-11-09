@@ -12,28 +12,29 @@ export const OPCIONES_HALLAZGOS = [
 ];
 
 /**
- * Infracciones ambientales (Ley de Ingresos del Municipio de Pabellón de Arteaga,
- * ejercicio 2026). Multa: 100 a 1,000 UMA.
+ * Infracciones aplicables a control de quema / ladrilleras
+ * (Ley de Ingresos del Municipio de Pabellón de Arteaga, ejercicio 2026).
  * Fuente: https://imbio.info/normativa-vigente/lectura.html?doc=ley-ingresos-2026
  */
 export const OPCIONES_SANCION = [
-  { id: "a", label: "a) Generar residuos sólidos domésticos sin apegarse a las disposiciones del Ayuntamiento." },
-  { id: "b", label: "b) Arrojar basura desde vehículos automotores a la vía pública." },
-  { id: "c", label: "c) Criar, engordar o producir animales en zona urbana sin autorización." },
-  { id: "d", label: "d) Generar malos olores o fauna nociva por falta de higiene en la producción animal." },
-  { id: "e", label: "e) Descargar desechos de producción animal al suelo, zanjas, canales, barrancas, cuerpos de agua o drenaje municipal." },
-  { id: "f", label: "f) No cumplir con las medidas de ahorro de agua potable." },
-  { id: "g", label: "g) Generar emisiones contaminantes (ruido, vibraciones, energía térmica, lumínica o visual) que excedan los límites de NOM, normas estatales o criterios ambientales." },
-  { id: "h", label: "h) Depositar residuos vegetales del mantenimiento de áreas verdes dentro o junto a contenedores de residuos sólidos municipales." },
-  { id: "i", label: "i) Podar, talar o trasplantar árboles en áreas públicas o privadas sin autorización previa del IMBIO." },
-  { id: "j", label: "j) Utilizar el fuego para el control de malezas o limpieza de terrenos en áreas verdes o baldíos sin autorización." },
-  { id: "k", label: "k) Realizar actividades que afecten significativamente la calidad del suelo sin aplicar medidas de conservación o restauración dictadas por el IMBIO." },
-  { id: "l", label: "l) Descargar aguas residuales al drenaje municipal sin registro o licencia ambiental vigente." },
-  { id: "m", label: "m) Transportar materiales pétreos, tierra o de construcción en contenedores/plataformas abiertas que permitan dispersión de partículas, malos olores o escurrimientos." },
+  {
+    id: "c",
+    label: "c) Realice combustión de llantas;",
+  },
+  {
+    id: "f",
+    label: "f) Emita ostensiblemente contaminantes a la atmósfera, tales como humos, polvos, gases, vapores u olores;",
+  },
 ];
 
+/** Rango legal de multa para estas infracciones. */
+export const SANCION_MULTA_MIN = 100;
+export const SANCION_MULTA_MAX = 1000;
+/** Monto sugerido por defecto al levantar acta de sanción (dentro del rango legal). */
+export const SANCION_MULTA_SUGERIDA = 500;
+
 export const SANCION_MULTA_TEXTO =
-  "Se sancionará con multa de 100 a 1,000 UMA (Unidad de Medida y Actualización), a su valor vigente al momento de cometer la infracción, conforme a la Ley de Ingresos del Municipio de Pabellón de Arteaga, ejercicio fiscal 2026.";
+  "Se sancionará con multa de 100 a 1,000 UMA (Unidad de Medida y Actualización), a su valor vigente al momento de cometer la infracción, a quien incurra en las conductas señaladas, conforme a la Ley de Ingresos del Municipio de Pabellón de Arteaga, ejercicio fiscal 2026.";
 
 // --- Cálculo de estado de un permiso a partir de sus fechas ---
 // Devuelve 'vigente' | 'por_vencer' | 'vencido'
@@ -147,7 +148,8 @@ export function accionesHtmlSimple(id) {
 export function accionesHtmlReporte(id) {
   return `
     <div class="row-actions">
-      <button class="row-btn" data-action="pdf" data-id="${id}" title="Generar PDF de inspección">📄</button>
+      <button class="row-btn" data-action="pdf" data-id="${id}" title="Acta de inspección (PDF)">📋</button>
+      <button class="row-btn" data-action="pdf-sancion" data-id="${id}" title="Acta de sanción (PDF)">⚖️</button>
       <button class="row-btn" data-action="editar" data-id="${id}" title="Editar">✏️</button>
       <button class="row-btn row-btn-danger" data-action="eliminar" data-id="${id}" title="Eliminar">🗑️</button>
     </div>

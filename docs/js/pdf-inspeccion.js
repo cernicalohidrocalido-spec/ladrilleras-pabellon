@@ -1,6 +1,11 @@
 import {
-  formatFechaHora, OPCIONES_HALLAZGOS, OPCIONES_SANCION, SANCION_MULTA_TEXTO,
-} from "./utils.js?v=23";
+  formatFechaHora,
+  OPCIONES_HALLAZGOS,
+  OPCIONES_SANCION,
+  SANCION_MULTA_TEXTO,
+  SANCION_MULTA_MIN,
+  SANCION_MULTA_MAX,
+} from "./utils.js?v=24";
 
 const ETIQUETA_RESULTADO = {
   con_permiso_vigente: "Con permiso vigente",
@@ -25,52 +30,8 @@ function urlLogoInstitucional() {
   }
 }
 
-/**
- * Abre una ventana imprimible del reporte de inspección (el inspector
- * puede guardar como PDF desde el diálogo de impresión del navegador).
- */
-export function generarPdfInspeccion(reporte, horno) {
-  const lat = reporte.ubicacion_reportada?.latitude;
-  const lng = reporte.ubicacion_reportada?.longitude;
-  const fotos = Array.isArray(reporte.fotos) ? reporte.fotos : [];
-  const resultado = ETIQUETA_RESULTADO[reporte.resultado_verificacion] || reporte.resultado_verificacion || "—";
-  const coords =
-    lat != null && lng != null ? `${Number(lat).toFixed(6)}, ${Number(lng).toFixed(6)}` : "—";
-  const folio = reporte.folio || reporte.id?.slice(0, 8) || "SIN-FOLIO";
-  const logo = urlLogoInstitucional();
-
-  const fotosHtml = fotos.length
-    ? `<div class="fotos">${fotos
-        .map(
-          (f, i) => `
-      <figure>
-        <img src="${esc(f.url)}" alt="Evidencia ${i + 1}">
-        <figcaption>Fotografía ${i + 1}${f.nombre ? ` — ${esc(f.nombre)}` : ""}</figcaption>
-      </figure>`
-        )
-        .join("")}</div>`
-    : `<p class="muted">Sin fotografías adjuntas.</p>`;
-
-  const ids = reporte.hallazgos_checklist || [];
-  const mapa = Object.fromEntries(OPCIONES_HALLAZGOS.map((o) => [o.id, o.label]));
-  const listaHallazgos = ids.length
-    ? `<ul>${ids.map((id) => `<li>${esc(mapa[id] || id)}</li>`).join("")}</ul>`
-    : `<p class="muted">Ningún hallazgo marcado.</p>`;
-  const obs = (reporte.observaciones_adicionales || "").trim();
-  const legado =
-    !ids.length && !obs && reporte.hallazgos
-      ? `<p>${esc(reporte.hallazgos).replace(/\n/g, "<br>")}</p>`
-      : "";
-  const obsHtml = obs
-    ? `<p style="margin-top:10px"><strong>Observaciones adicionales:</strong><br>${esc(obs).replace(/\n/g, "<br>")}</p>`
-    : "";
-
-  const html = `<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Inspección ${esc(folio)} — IMBIO</title>
-  <style>
+function estilosComunes() {
+  return `
     @page { margin: 14mm 12mm; }
     body { font-family: "Segoe UI", system-ui, sans-serif; color: #12263a; margin: 0; font-size: 13px; }
     .membrete {
@@ -90,9 +51,7 @@ export function generarPdfInspeccion(reporte, horno) {
       font-size: 17px; margin: 0 0 4px; color: #002A5C; line-height: 1.25;
     }
     .membrete-texto .muni { font-size: 12px; color: #334155; margin: 0; }
-    .folio-box {
-      text-align: right; min-width: 140px;
-    }
+    .folio-box { text-align: right; min-width: 140px; }
     .folio-box .lbl { font-size: 10px; color: #5a6b7d; text-transform: uppercase; }
     .folio-box .folio {
       font-family: ui-monospace, Consolas, monospace;
@@ -136,12 +95,12 @@ export function generarPdfInspeccion(reporte, horno) {
       background: #002A5C; color: #fff; border: none; border-radius: 8px;
       padding: 10px 18px; font-size: 14px; cursor: pointer;
     }
-    @media print {
-      .actions { display: none; }
-    }
-  </style>
-</head>
-<body>
+    @media print { .actions { display: none; } }
+  `;
+}
+
+function membreteHtml(logo, folio, etiquetaFolio) {
+  return `
   <header class="membrete">
     <img src="${esc(logo)}" alt="IMBIO">
     <div class="membrete-texto">
@@ -150,12 +109,86 @@ export function generarPdfInspeccion(reporte, horno) {
       <p class="muni">H. Ayuntamiento de Pabellón de Arteaga, Aguascalientes</p>
     </div>
     <div class="folio-box">
-      <div class="lbl">Folio de inspección</div>
+      <div class="lbl">${esc(etiquetaFolio)}</div>
       <div class="folio">${esc(folio)}</div>
     </div>
-  </header>
+  </header>`;
+}
 
-  <p class="titulo-doc">Reporte de inspección de ladrillera</p>
+function abrirVentanaPdf(html) {
+  const win = window.open("", "_blank");
+  if (!win) {
+    window.alert("Permite ventanas emergentes para generar el PDF.");
+    return;
+  }
+  win.document.open();
+  win.document.write(html);
+  win.document.close();
+}
+
+function datosBase(reporte) {
+  const lat = reporte.ubicacion_reportada?.latitude;
+  const lng = reporte.ubicacion_reportada?.longitude;
+  return {
+    fotos: Array.isArray(reporte.fotos) ? reporte.fotos : [],
+    resultado: ETIQUETA_RESULTADO[reporte.resultado_verificacion] || reporte.resultado_verificacion || "—",
+    coords: lat != null && lng != null ? `${Number(lat).toFixed(6)}, ${Number(lng).toFixed(6)}` : "—",
+    folio: reporte.folio || reporte.id?.slice(0, 8) || "SIN-FOLIO",
+    logo: urlLogoInstitucional(),
+  };
+}
+
+function anexoFotosHtml(fotos, folio, leyenda) {
+  if (!fotos.length) return `<p class="muted">No se adjuntaron fotografías.</p>`;
+  return `<div class="anexo-fotos">${fotos
+    .map(
+      (f, i) => `<figure>
+      <img src="${esc(f.url)}" alt="Anexo ${i + 1}">
+      <figcaption>Anexo ${i + 1}${f.nombre ? ` — ${esc(f.nombre)}` : ""} · ${esc(leyenda)}</figcaption>
+    </figure>`
+    )
+    .join("")}</div>`;
+}
+
+/** Acta / reporte de inspección (sin sanciones). */
+export function generarPdfInspeccion(reporte, horno) {
+  const { fotos, resultado, coords, folio, logo } = datosBase(reporte);
+
+  const ids = reporte.hallazgos_checklist || [];
+  const mapa = Object.fromEntries(OPCIONES_HALLAZGOS.map((o) => [o.id, o.label]));
+  const listaHallazgos = ids.length
+    ? `<ul>${ids.map((id) => `<li>${esc(mapa[id] || id)}</li>`).join("")}</ul>`
+    : `<p class="muted">Ningún hallazgo marcado.</p>`;
+  const obs = (reporte.observaciones_adicionales || "").trim();
+  const legado =
+    !ids.length && !obs && reporte.hallazgos
+      ? `<p>${esc(reporte.hallazgos).replace(/\n/g, "<br>")}</p>`
+      : "";
+  const obsHtml = obs
+    ? `<p style="margin-top:10px"><strong>Observaciones adicionales:</strong><br>${esc(obs).replace(/\n/g, "<br>")}</p>`
+    : "";
+
+  const fotosResumen = fotos.length
+    ? `<div class="fotos">${fotos
+        .map(
+          (f, i) => `<figure>
+      <img class="evidencia" src="${esc(f.url)}" alt="Evidencia ${i + 1}">
+      <figcaption>Fotografía ${i + 1}</figcaption>
+    </figure>`
+        )
+        .join("")}</div>`
+    : `<p class="muted">Sin fotografías adjuntas.</p>`;
+
+  const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Acta de inspección ${esc(folio)} — IMBIO</title>
+  <style>${estilosComunes()}</style>
+</head>
+<body>
+  ${membreteHtml(logo, folio, "Folio de inspección")}
+  <p class="titulo-doc">Acta / reporte de inspección de ladrillera</p>
 
   <div class="grid">
     <div class="item"><label>Fecha y hora</label><strong>${esc(formatFechaHora(reporte.fecha_hora_reporte))}</strong></div>
@@ -163,7 +196,7 @@ export function generarPdfInspeccion(reporte, horno) {
     <div class="item"><label>Núcleo / localidad</label><strong>${esc(reporte.nucleo_localidad || "—")}</strong></div>
     <div class="item"><label>Dirección</label><strong>${esc(reporte.direccion_reportada || "—")}</strong></div>
     <div class="item"><label>Coordenadas</label><strong>${esc(coords)}</strong></div>
-    <div class="item"><label>Atendido por</label><strong>${esc(reporte.atendido_por || "—")}</strong></div>
+    <div class="item"><label>Inspector</label><strong>${esc(reporte.atendido_por || "—")}</strong></div>
     <div class="item"><label>Horno identificado</label><strong>${esc(horno?.nombre_referencia || "No identificado")}</strong></div>
     <div class="item"><label>Resultado de verificación</label><strong><span class="pill">${esc(resultado)}</span></strong></div>
   </div>
@@ -184,60 +217,109 @@ export function generarPdfInspeccion(reporte, horno) {
   </div>
 
   <div class="box">
-    <h2>Sanción — Ley de Ingresos del Municipio (ejercicio 2026)</h2>
-    <p class="muted" style="margin-top:0">${esc(SANCION_MULTA_TEXTO)}</p>
-    ${(() => {
-      const ids = reporte.sancion_infracciones || [];
-      const mapa = Object.fromEntries(OPCIONES_SANCION.map((o) => [o.id, o.label]));
-      if (!ids.length) return `<p class="muted">Sin infracciones marcadas en esta inspección.</p>`;
-      return `<ul>${ids.map((id) => `<li>${esc(mapa[id] || id)}</li>`).join("")}</ul>
-        <p><strong>Multa propuesta:</strong> ${esc(reporte.sancion_umas ? `${reporte.sancion_umas} UMA` : "Por determinar (100 a 1,000 UMA)")}</p>
-        ${reporte.sancion_observaciones ? `<p><strong>Observaciones:</strong><br>${esc(reporte.sancion_observaciones).replace(/\n/g, "<br>")}</p>` : ""}`;
-    })()}
-    <p class="muted" style="font-size:10px;margin-bottom:0">
-      Consulta: https://imbio.info/normativa-vigente/lectura.html?doc=ley-ingresos-2026
-    </p>
-  </div>
-
-  <div class="box">
     <h2>Evidencia fotográfica (resumen)</h2>
-    ${fotosHtml.replace(/<img /g, '<img class="evidencia" ')}
+    ${fotosResumen}
   </div>
 
   <section class="anexo">
-    <h2>Anexo fotográfico — Folio ${esc(folio)}</h2>
-    ${
-      fotos.length
-        ? `<div class="anexo-fotos">${fotos
-            .map(
-              (f, i) => `<figure>
-            <img src="${esc(f.url)}" alt="Anexo ${i + 1}">
-            <figcaption>Anexo ${i + 1}${f.nombre ? ` — ${esc(f.nombre)}` : ""} · Evidencia de inspección</figcaption>
-          </figure>`
-            )
-            .join("")}</div>`
-        : `<p class="muted">No se adjuntaron fotografías a este reporte.</p>`
-    }
+    <h2>Anexo fotográfico — Inspección ${esc(folio)}</h2>
+    ${anexoFotosHtml(fotos, folio, "Evidencia de inspección")}
   </section>
 
   <p class="pie">
-    Documento generado por el sistema Control de Quema — IMBIO Pabellón de Arteaga.<br>
-    Folio ${esc(folio)} · ${esc(formatFechaHora(new Date()))}
+    Acta de inspección — Control de Quema · IMBIO Pabellón de Arteaga.<br>
+    Folio ${esc(folio)} · ${esc(formatFechaHora(new Date()))}<br>
+    Este documento no constituye acta de sanción.
   </p>
 
-  <div class="actions">
-    <button onclick="window.print()">Imprimir / Guardar PDF</button>
-  </div>
+  <div class="actions"><button onclick="window.print()">Imprimir / Guardar PDF</button></div>
   <script>window.addEventListener("load", () => setTimeout(() => window.print(), 600));</script>
 </body>
 </html>`;
 
-  const win = window.open("", "_blank");
-  if (!win) {
-    window.alert("Permite ventanas emergentes para generar el PDF.");
-    return;
-  }
-  win.document.open();
-  win.document.write(html);
-  win.document.close();
+  abrirVentanaPdf(html);
+}
+
+/** Acta de sanción (documento distinto a la inspección). */
+export function generarPdfSancion(reporte, horno) {
+  const { fotos, coords, folio, logo } = datosBase(reporte);
+  const folioSancion = reporte.folio_sancion || `SANC-${folio.replace(/^INSP-/, "")}`;
+
+  const ids = (reporte.sancion_infracciones || []).filter((id) =>
+    OPCIONES_SANCION.some((o) => o.id === id)
+  );
+  const mapa = Object.fromEntries(OPCIONES_SANCION.map((o) => [o.id, o.label]));
+  const lista =
+    ids.length > 0
+      ? `<ul>${ids.map((id) => `<li>${esc(mapa[id] || id)}</li>`).join("")}</ul>`
+      : `<p class="muted">No se marcaron infracciones c) ni f). Complete la sección de sanción en el formulario.</p>`;
+
+  const umas = Number(reporte.sancion_umas);
+  const umasTxt = Number.isFinite(umas) && umas > 0
+    ? `${umas} UMA`
+    : `Por determinar (${SANCION_MULTA_MIN} a ${SANCION_MULTA_MAX} UMA)`;
+
+  const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Acta de sanción ${esc(folioSancion)} — IMBIO</title>
+  <style>${estilosComunes()}</style>
+</head>
+<body>
+  ${membreteHtml(logo, folioSancion, "Folio de sanción")}
+  <p class="titulo-doc">Acta de sanción ambiental</p>
+
+  <div class="box">
+    <h2>Referencia a la inspección</h2>
+    <p>Folio de inspección: <strong>${esc(folio)}</strong><br>
+    Fecha de los hechos: <strong>${esc(formatFechaHora(reporte.fecha_hora_reporte))}</strong><br>
+    Horno / propietario: <strong>${esc(horno?.nombre_referencia || horno?.propietario_nombre || "No identificado")}</strong><br>
+    Núcleo / localidad: <strong>${esc(reporte.nucleo_localidad || "—")}</strong><br>
+    Dirección: <strong>${esc(reporte.direccion_reportada || "—")}</strong><br>
+    Coordenadas: <strong>${esc(coords)}</strong><br>
+    Inspector: <strong>${esc(reporte.atendido_por || "—")}</strong></p>
+  </div>
+
+  <div class="box">
+    <h2>Fundamento — Ley de Ingresos del Municipio (ejercicio 2026)</h2>
+    <p>${esc(SANCION_MULTA_TEXTO)}</p>
+    <p class="muted" style="font-size:11px;margin-bottom:0">
+      Fuente: https://imbio.info/normativa-vigente/lectura.html?doc=ley-ingresos-2026
+    </p>
+  </div>
+
+  <div class="box">
+    <h2>Infracciones imputadas</h2>
+    ${lista}
+    <p style="margin-top:12px"><strong>Multa determinada / propuesta:</strong> ${esc(umasTxt)}</p>
+    ${
+      reporte.sancion_observaciones
+        ? `<p><strong>Observaciones de la sanción:</strong><br>${esc(reporte.sancion_observaciones).replace(/\n/g, "<br>")}</p>`
+        : ""
+    }
+  </div>
+
+  <div class="box">
+    <h2>Hechos relacionados</h2>
+    <p>${esc(reporte.descripcion || "Remítase al acta de inspección correspondiente.").replace(/\n/g, "<br>")}</p>
+  </div>
+
+  <section class="anexo">
+    <h2>Anexo fotográfico — Sanción ${esc(folioSancion)}</h2>
+    ${anexoFotosHtml(fotos, folioSancion, "Evidencia de la sanción")}
+  </section>
+
+  <p class="pie">
+    Acta de sanción — Control de Quema · IMBIO Pabellón de Arteaga.<br>
+    Folio sanción ${esc(folioSancion)} · Inspección relacionada ${esc(folio)} · ${esc(formatFechaHora(new Date()))}<br>
+    Documento distinto e independiente del acta de inspección.
+  </p>
+
+  <div class="actions"><button onclick="window.print()">Imprimir / Guardar PDF</button></div>
+  <script>window.addEventListener("load", () => setTimeout(() => window.print(), 600));</script>
+</body>
+</html>`;
+
+  abrirVentanaPdf(html);
 }

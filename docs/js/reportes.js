@@ -1,16 +1,16 @@
 ﻿import {
   db, storage, collection, addDoc, updateDoc, deleteDoc, getDocs, doc,
   Timestamp, GeoPoint, ref, uploadBytes, getDownloadURL,
-} from "./db.js?v=23";
+} from "./db.js?v=24";
 import {
   abrirModal, cerrarModal, pillHtml, formatFechaHora, distanciaMetros,
   calcularEstadoPermiso, accionesHtmlReporte, OPCIONES_HALLAZGOS,
-  OPCIONES_SANCION, SANCION_MULTA_TEXTO,
-} from "./utils.js?v=23";
-import { listarHornos } from "./hornos.js?v=23";
-import { listarPermisos } from "./permisos.js?v=23";
-import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=23";
-import { generarPdfInspeccion } from "./pdf-inspeccion.js?v=23";
+  OPCIONES_SANCION, SANCION_MULTA_TEXTO, SANCION_MULTA_MIN, SANCION_MULTA_MAX, SANCION_MULTA_SUGERIDA,
+} from "./utils.js?v=24";
+import { listarHornos } from "./hornos.js?v=24";
+import { listarPermisos } from "./permisos.js?v=24";
+import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=24";
+import { generarPdfInspeccion, generarPdfSancion } from "./pdf-inspeccion.js?v=24";
 
 const reportesCol = collection(db, "reportes_quema");
 const RADIO_MATCH_METROS = 150;
@@ -45,11 +45,12 @@ function checklistHallazgosHtml(seleccionados = []) {
 
 function checklistSancionHtml(seleccionados = [], umas = "", obs = "") {
   const set = new Set(seleccionados || []);
+  const valorUmas = umas || SANCION_MULTA_SUGERIDA;
   return `
     <div class="sancion-bloque">
-      <div class="hallazgos-label">Sanción (Ley de Ingresos 2026)</div>
+      <div class="hallazgos-label">Datos para acta de sanción (documento aparte)</div>
       <p class="sancion-fund">${SANCION_MULTA_TEXTO}</p>
-      <p class="geo-hint">Marca la(s) infracción(es) aplicable(s). Para quema en baldíos/áreas verdes suele aplicar el inciso <strong>j)</strong>; emisiones contaminantes el <strong>g)</strong>.</p>
+      <p class="geo-hint">Solo infracciones aplicables a ladrilleras / quema: <strong>c)</strong> combustión de llantas y <strong>f)</strong> emisiones contaminantes a la atmósfera. El PDF de sanción se genera por separado del acta de inspección.</p>
       <div class="hallazgos-checklist" role="group" aria-label="Infracciones">
         ${OPCIONES_SANCION.map(
           (o) => `<label class="check-row">
@@ -60,7 +61,7 @@ function checklistSancionHtml(seleccionados = [], umas = "", obs = "") {
       </div>
       <div class="field-row">
         <label>Multa propuesta (UMA)
-          <input type="number" id="f-sancion-umas" min="100" max="1000" step="1" placeholder="100–1000" value="${umas || ""}">
+          <input type="number" id="f-sancion-umas" min="${SANCION_MULTA_MIN}" max="${SANCION_MULTA_MAX}" step="1" placeholder="${SANCION_MULTA_MIN}–${SANCION_MULTA_MAX}" value="${valorUmas}">
         </label>
       </div>
       <label>Observaciones de la sanción
@@ -399,7 +400,12 @@ function formInspeccionHtml(reporte) {
 
       <div class="form-acciones-fila">
         <button class="btn btn-primary" id="f-verificar">${editando ? "💾 Guardar cambios" : "🔍 Verificar y guardar"}</button>
-        ${editando ? `<button type="button" class="btn btn-secondary" id="f-pdf">📄 Generar PDF</button>` : ""}
+        ${
+          editando
+            ? `<button type="button" class="btn btn-secondary" id="f-pdf">📋 Acta de inspección</button>
+               <button type="button" class="btn btn-secondary" id="f-pdf-sancion">⚖️ Acta de sanción</button>`
+            : ""
+        }
       </div>
       <div id="f-resultado" style="margin-top:6px;"></div>
     </div>
@@ -620,10 +626,14 @@ export function abrirFormularioReporte(onGuardado) {
         <strong>Folio ${folio}</strong> · Resultado: ${pillHtml(verificacion.resultado)}
         ${avisoFotos}
         <div class="form-acciones-fila" style="margin-top:10px">
-          <button type="button" class="btn btn-secondary" id="f-pdf-ahora">📄 Generar PDF de inspección</button>
+          <button type="button" class="btn btn-secondary" id="f-pdf-ahora">📋 Acta de inspección</button>
+          <button type="button" class="btn btn-secondary" id="f-pdf-sancion-ahora">⚖️ Acta de sanción</button>
         </div>`;
       document.getElementById("f-pdf-ahora")?.addEventListener("click", () => {
         generarPdfInspeccion(reporteGuardado, verificacion.horno);
+      });
+      document.getElementById("f-pdf-sancion-ahora")?.addEventListener("click", () => {
+        generarPdfSancion(reporteGuardado, verificacion.horno);
       });
 
       setTimeout(() => {
@@ -649,6 +659,9 @@ export function abrirFormularioEditarReporte(reporte, onGuardado, horno) {
   document.getElementById("f-pdf")?.addEventListener("click", () => {
     generarPdfInspeccion(reporte, horno);
   });
+  document.getElementById("f-pdf-sancion")?.addEventListener("click", () => {
+    generarPdfSancion(reporte, horno);
+  });
 
   document.getElementById("f-verificar").addEventListener("click", async () => {
     const campos = leerCamposFormulario();
@@ -666,4 +679,4 @@ export function abrirFormularioEditarReporte(reporte, onGuardado, horno) {
   });
 }
 
-export { generarPdfInspeccion };
+export { generarPdfInspeccion, generarPdfSancion };
