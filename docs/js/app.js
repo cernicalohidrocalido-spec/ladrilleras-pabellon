@@ -1,21 +1,24 @@
-﻿import { listarHornos, renderTablaHornos, abrirFormularioHorno, eliminarHorno, abrirDetalleHorno } from "./hornos.js?v=14";
-import { listarPermisos, renderTablaPermisos, abrirFormularioPermiso, eliminarPermiso, ordenarPermisos } from "./permisos.js?v=14";
-import { listarReportes, renderTablaReportes, abrirFormularioReporte, abrirFormularioEditarReporte, eliminarReporte } from "./reportes.js?v=14";
-import { pintarHornosEnMapa, conectarFiltrosMapa } from "./mapa.js?v=14";
-import { calcularEstadoPermiso, pillHtml, formatFecha, confirmarAccion } from "./utils.js?v=14";
-import { exportarHornos, exportarPermisos, exportarReportes } from "./exportar.js?v=14";
+﻿import { listarHornos, renderTablaHornos, abrirFormularioHorno, eliminarHorno, abrirDetalleHorno } from "./hornos.js?v=15";
+import { listarPermisos, renderTablaPermisos, abrirFormularioPermiso, eliminarPermiso, ordenarPermisos } from "./permisos.js?v=15";
+import { listarReportes, renderTablaReportes, abrirFormularioReporte, abrirFormularioEditarReporte, eliminarReporte } from "./reportes.js?v=15";
+import { pintarHornosEnMapa, conectarFiltrosMapa, enfocarHornoEnMapa } from "./mapa.js?v=15";
+import { calcularEstadoPermiso, pillHtml, formatFecha, confirmarAccion } from "./utils.js?v=15";
+import { exportarHornos, exportarPermisos, exportarReportes } from "./exportar.js?v=15";
 
 let sortPermisos = { campo: "registro", dir: "desc" };
 
+function irASeccion(nombre) {
+  document.querySelectorAll(".nav-item").forEach((b) => {
+    b.classList.toggle("active", b.dataset.section === nombre);
+  });
+  document.querySelectorAll(".section").forEach((s) => s.classList.remove("active"));
+  document.getElementById(`section-${nombre}`)?.classList.add("active");
+  if (nombre === "mapa") cargarMapa();
+}
+
 // --- Navegación entre secciones ---
 document.querySelectorAll(".nav-item").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".nav-item").forEach((b) => b.classList.remove("active"));
-    document.querySelectorAll(".section").forEach((s) => s.classList.remove("active"));
-    btn.classList.add("active");
-    document.getElementById(`section-${btn.dataset.section}`).classList.add("active");
-    if (btn.dataset.section === "mapa") cargarMapa();
-  });
+  btn.addEventListener("click", () => irASeccion(btn.dataset.section));
 });
 
 let cacheHornos = [];
@@ -252,6 +255,19 @@ document.querySelector("#tabla-permisos thead").addEventListener("click", (e) =>
 document.querySelector("#tabla-permisos tbody").addEventListener("click", async (e) => {
   const btn = e.target.closest("button[data-action]");
   if (!btn) return;
+
+  if (btn.dataset.action === "mapa") {
+    const hornoId = btn.dataset.hornoId;
+    const horno = cacheHornos.find((h) => h.id === hornoId);
+    if (!horno?.ubicacion) {
+      window.alert("Este horno no tiene coordenadas registradas.");
+      return;
+    }
+    irASeccion("mapa");
+    enfocarHornoEnMapa(hornoId);
+    return;
+  }
+
   const permiso = cachePermisos.find((p) => p.id === btn.dataset.id);
   if (!permiso) return;
 

@@ -1,6 +1,6 @@
-﻿import { db, collection, doc, addDoc, updateDoc, deleteDoc, getDocs, Timestamp } from "./db.js?v=14";
-import { abrirModal, cerrarModal, calcularEstadoPermiso, pillHtml, gaugeHtml, formatFecha, accionesHtmlSimple, toDateInputValue, toMillis, fechaRegistroPermiso } from "./utils.js?v=14";
-import { listarHornos } from "./hornos.js?v=14";
+﻿import { db, collection, doc, addDoc, updateDoc, deleteDoc, getDocs, Timestamp } from "./db.js?v=15";
+import { abrirModal, cerrarModal, calcularEstadoPermiso, pillHtml, gaugeHtml, formatFecha, accionesHtmlSimple, toDateInputValue, toMillis, fechaRegistroPermiso } from "./utils.js?v=15";
+import { listarHornos } from "./hornos.js?v=15";
 
 const permisosCol = collection(db, "permisos");
 
@@ -78,7 +78,16 @@ export function renderTablaPermisos(permisos, hornosById) {
       <tr>
         <td style="font-family:var(--font-mono)">${p.folio || "—"}</td>
         <td>${horno.nombre_referencia || "—"}</td>
-        <td>${horno.direccion || "—"}</td>
+        <td>
+          <div class="celda-ubicacion">
+            <span>${horno.direccion || "—"}</span>
+            ${
+              horno.ubicacion
+                ? `<button type="button" class="btn-ver-mapa" data-action="mapa" data-horno-id="${horno.id}" title="Ver este horno en el mapa">🗺️ Ver en el mapa</button>`
+                : ""
+            }
+          </div>
+        </td>
         <td data-sort-value="${toMillis(registro)}">${formatFecha(registro)}</td>
         <td>${formatFecha(p.fecha_vigencia_inicio)} – ${formatFecha(p.fecha_vigencia_fin)}</td>
         <td>${(p.dias_autorizados || []).join(", ") || "—"}</td>

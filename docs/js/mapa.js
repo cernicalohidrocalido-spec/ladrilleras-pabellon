@@ -1,4 +1,4 @@
-﻿import { calcularEstadoPermiso, formatFecha } from "./utils.js?v=14";
+﻿import { calcularEstadoPermiso, formatFecha } from "./utils.js?v=15";
 
 // Coordenadas reales de la cabecera municipal de Pabellón de Arteaga, Ags.
 export const CENTRO_PABELLON = [22.1492, -102.2765];
@@ -6,6 +6,7 @@ export const CENTRO_PABELLON = [22.1492, -102.2765];
 let mapaInstancia = null;
 let capasMapaPrincipal = null;
 let capaMarcadores = null;
+let marcadoresPorHorno = new Map();
 let cacheMapa = { hornos: [], permisosPorHorno: {}, callbacks: {}, filtros: null };
 
 const COLOR_ESTADO = {
@@ -121,6 +122,7 @@ export function pintarHornosEnMapa(hornos, permisosPorHorno, callbacks = {}) {
 
   if (capaMarcadores) capaMarcadores.clearLayers();
   else capaMarcadores = L.layerGroup().addTo(mapa);
+  marcadoresPorHorno.clear();
 
   const filtros = cacheMapa.filtros;
   let visibles = 0;
@@ -178,12 +180,40 @@ export function pintarHornosEnMapa(hornos, permisosPorHorno, callbacks = {}) {
     });
 
     capaMarcadores.addLayer(marker);
+    marcadoresPorHorno.set(h.id, marker);
   });
 
   const contador = document.getElementById("mapa-filtro-count");
   if (contador) {
     contador.textContent = `${visibles} de ${hornos.filter((h) => h.ubicacion).length} hornos visibles`;
   }
+}
+
+/** Asegura que el filtro del estado del horno esté activo y centra el mapa en él. */
+export function enfocarHornoEnMapa(hornoId) {
+  const mapa = inicializarMapa();
+  const horno = cacheMapa.hornos.find((h) => h.id === hornoId);
+  if (!horno?.ubicacion) return false;
+
+  const permisos = cacheMapa.permisosPorHorno[hornoId] || [];
+  const { estado } = estadoHorno(permisos);
+  const filtros = cacheMapa.filtros || leerFiltrosActivos();
+  if (!filtros.has(estado)) {
+    const chip = document.querySelector(`#mapa-filtros-estado .filtro-chip[data-estado="${estado}"]`);
+    if (chip) chip.classList.add("active");
+    aplicarFiltrosMapa([...filtros, estado]);
+  }
+
+  const latlng = [horno.ubicacion.latitude, horno.ubicacion.longitude];
+  requestAnimationFrame(() => {
+    mapa.invalidateSize();
+    mapa.flyTo(latlng, 17, { duration: 0.7 });
+    const marker = marcadoresPorHorno.get(hornoId);
+    if (marker) {
+      setTimeout(() => marker.openPopup(), 750);
+    }
+  });
+  return true;
 }
 
 export function aplicarFiltrosMapa(estadosActivos) {

@@ -531,6 +531,27 @@ h1 {
 }
 .mapa-popup-btn:hover { background: var(--border); }
 
+.celda-ubicacion {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  max-width: 260px;
+}
+.btn-ver-mapa {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--brand, #003B7A);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.btn-ver-mapa:hover { color: var(--brand-dark, #002552); }
+
 /* Acciones por fila (ver/editar/eliminar) */
 .row-actions {
   display: flex;
