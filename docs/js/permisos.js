@@ -1,6 +1,6 @@
-import { db, collection, doc, addDoc, updateDoc, deleteDoc, getDocs, Timestamp } from "./db.js?v=29";
-import { abrirModal, cerrarModal, calcularEstadoPermiso, pillHtml, gaugeHtml, formatFecha, accionesHtmlSimple, toDateInputValue, toMillis, fechaRegistroPermiso } from "./utils.js?v=29";
-import { listarHornos } from "./hornos.js?v=29";
+import { db, collection, doc, addDoc, updateDoc, deleteDoc, getDocs, Timestamp } from "./db.js?v=30";
+import { abrirModal, cerrarModal, calcularEstadoPermiso, pillHtml, gaugeHtml, formatFecha, accionesHtmlSimple, toDateInputValue, toMillis, fechaRegistroPermiso } from "./utils.js?v=30";
+import { listarHornos } from "./hornos.js?v=30";
 
 const permisosCol = collection(db, "permisos");
 

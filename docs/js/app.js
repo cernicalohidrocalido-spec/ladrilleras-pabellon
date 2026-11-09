@@ -1,9 +1,9 @@
-import { listarHornos, renderTablaHornos, abrirFormularioHorno, eliminarHorno, abrirDetalleHorno } from "./hornos.js?v=29";
-import { listarPermisos, renderTablaPermisos, abrirFormularioPermiso, eliminarPermiso, ordenarPermisos } from "./permisos.js?v=29";
-import { listarReportes, renderTablaReportes, abrirFormularioReporte, abrirFormularioEditarReporte, eliminarReporte, generarPdfInspeccion, generarPdfSancion } from "./reportes.js?v=29";
-import { pintarHornosEnMapa, conectarFiltrosMapa, enfocarHornoEnMapa } from "./mapa.js?v=29";
-import { calcularEstadoPermiso, pillHtml, formatFecha, confirmarAccion } from "./utils.js?v=29";
-import { exportarHornos, exportarPermisos, exportarReportes } from "./exportar.js?v=29";
+import { listarHornos, renderTablaHornos, abrirFormularioHorno, eliminarHorno, abrirDetalleHorno } from "./hornos.js?v=30";
+import { listarPermisos, renderTablaPermisos, abrirFormularioPermiso, eliminarPermiso, ordenarPermisos } from "./permisos.js?v=30";
+import { listarReportes, renderTablaReportes, abrirFormularioReporte, abrirFormularioEditarReporte, eliminarReporte, generarPdfInspeccion, generarPdfSancion } from "./reportes.js?v=30";
+import { pintarHornosEnMapa, conectarFiltrosMapa, enfocarHornoEnMapa } from "./mapa.js?v=30";
+import { calcularEstadoPermiso, pillHtml, formatFecha, confirmarAccion } from "./utils.js?v=30";
+import { exportarHornos, exportarPermisos, exportarReportes } from "./exportar.js?v=30";
 
 let sortPermisos = { campo: "registro", dir: "desc" };
 
