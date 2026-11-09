@@ -1,6 +1,6 @@
-﻿import { db, collection, doc, addDoc, updateDoc, deleteDoc, getDocs, Timestamp } from "./db.js?v=15";
-import { abrirModal, cerrarModal, calcularEstadoPermiso, pillHtml, gaugeHtml, formatFecha, accionesHtmlSimple, toDateInputValue, toMillis, fechaRegistroPermiso } from "./utils.js?v=15";
-import { listarHornos } from "./hornos.js?v=15";
+﻿import { db, collection, doc, addDoc, updateDoc, deleteDoc, getDocs, Timestamp } from "./db.js?v=16";
+import { abrirModal, cerrarModal, calcularEstadoPermiso, pillHtml, gaugeHtml, formatFecha, accionesHtmlSimple, toDateInputValue, toMillis, fechaRegistroPermiso } from "./utils.js?v=16";
+import { listarHornos } from "./hornos.js?v=16";
 
 const permisosCol = collection(db, "permisos");
 
@@ -35,6 +35,7 @@ function construirDatosPermiso(data) {
   return {
     horno_id: doc(db, "hornos", data.horno_id),
     folio: data.folio,
+    nucleo_localidad: (data.nucleo_localidad || "").trim(),
     fecha_vigencia_inicio: Timestamp.fromDate(new Date(data.vigencia_inicio)),
     fecha_vigencia_fin: Timestamp.fromDate(new Date(data.vigencia_fin)),
     dias_autorizados: data.dias_autorizados,
@@ -74,13 +75,14 @@ export function renderTablaPermisos(permisos, hornosById) {
       const estado = calcularEstadoPermiso(p);
       const horno = hornosById[p.horno_id?.id] || {};
       const registro = fechaRegistroPermiso(p);
+      const ubicacion = p.nucleo_localidad || horno.direccion || "—";
       return `
       <tr>
         <td style="font-family:var(--font-mono)">${p.folio || "—"}</td>
         <td>${horno.nombre_referencia || "—"}</td>
         <td>
           <div class="celda-ubicacion">
-            <span>${horno.direccion || "—"}</span>
+            <span>${ubicacion}</span>
             ${
               horno.ubicacion
                 ? `<button type="button" class="btn-ver-mapa" data-action="mapa" data-horno-id="${horno.id}" title="Ver este horno en el mapa">🗺️ Ver en el mapa</button>`
@@ -111,6 +113,7 @@ async function formPermisoHtml(permiso) {
       <input type="checkbox" value="${d}" class="f-dia" ${diasSeleccionados.includes(d) ? "checked" : ""}> ${d}
     </label>`
   ).join("");
+  const nucleoValor = permiso?.nucleo_localidad || "";
 
   return `
     <label>Horno
@@ -118,6 +121,9 @@ async function formPermisoHtml(permiso) {
     </label>
     <label>Folio
       <input type="text" id="f-folio" placeholder="PA-2026-0001" value="${permiso?.folio || ""}">
+    </label>
+    <label>Núcleo de ladrilleras o localidad
+      <input type="text" id="f-nucleo" placeholder="Ej. Núcleo Las Ánimas, Ojo Zarco…" value="${nucleoValor}">
     </label>
     <div class="field-row">
       <label>Vigencia inicio
@@ -158,6 +164,7 @@ export async function abrirFormularioPermiso(onGuardado, permiso) {
     const data = {
       horno_id: document.getElementById("f-horno").value,
       folio: document.getElementById("f-folio").value,
+      nucleo_localidad: document.getElementById("f-nucleo").value,
       vigencia_inicio: document.getElementById("f-inicio").value,
       vigencia_fin: document.getElementById("f-fin").value,
       horario_inicio: document.getElementById("f-hora-inicio").value,
