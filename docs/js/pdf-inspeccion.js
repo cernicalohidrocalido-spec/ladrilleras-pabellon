@@ -11,7 +11,7 @@ import {
   formatPesosMXN,
   numeroALetrasPesos,
   SANCION_PLAZO_PAGO,
-} from "./utils.js?v=28";
+} from "./utils.js?v=29";
 
 const ETIQUETA_RESULTADO = {
   con_permiso_vigente: "Con permiso vigente",
@@ -493,7 +493,8 @@ export function generarPdfSancion(reporte, horno) {
 
   <div class="box">
     <h2>Hechos relacionados</h2>
-    <p>${esc(reporte.descripcion || "Remítase al acta de inspección correspondiente.").replace(/\n/g, "<br>")}</p>
+    <p><strong>Se hace constar que, al momento de la inspección, el responsable y/o el predio inspeccionado no contaban con el permiso de quema emitido por la autoridad municipal competente o por el Instituto Municipal de Biodiversidad y Protección Ambiental (IMBIO).</strong></p>
+    <p style="margin-top:8px">${esc(reporte.descripcion || "Remítase al acta de inspección correspondiente.").replace(/\n/g, "<br>")}</p>
   </div>
 
   <div class="box">

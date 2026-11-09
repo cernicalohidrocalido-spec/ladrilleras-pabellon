@@ -1,17 +1,17 @@
 import {
   db, storage, collection, addDoc, updateDoc, deleteDoc, getDocs, doc,
   Timestamp, GeoPoint, ref, uploadBytes, getDownloadURL,
-} from "./db.js?v=28";
+} from "./db.js?v=29";
 import {
   abrirModal, cerrarModal, pillHtml, formatFechaHora, distanciaMetros,
   calcularEstadoPermiso, accionesHtmlReporte, OPCIONES_HALLAZGOS,
   OPCIONES_SANCION, SANCION_MULTA_TEXTO, SANCION_MULTA_MIN, SANCION_MULTA_MAX, SANCION_MULTA_SUGERIDA,
   UMA_DIARIA_MXN, UMA_VIGENCIA, calcularMultaPesos, formatPesosMXN, numeroALetrasPesos, SANCION_PLAZO_PAGO,
-} from "./utils.js?v=28";
-import { listarHornos } from "./hornos.js?v=28";
-import { listarPermisos } from "./permisos.js?v=28";
-import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=28";
-import { generarPdfInspeccion, generarPdfSancion } from "./pdf-inspeccion.js?v=28";
+} from "./utils.js?v=29";
+import { listarHornos } from "./hornos.js?v=29";
+import { listarPermisos } from "./permisos.js?v=29";
+import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=29";
+import { generarPdfInspeccion, generarPdfSancion } from "./pdf-inspeccion.js?v=29";
 
 const reportesCol = collection(db, "reportes_quema");
 const RADIO_MATCH_METROS = 150;
