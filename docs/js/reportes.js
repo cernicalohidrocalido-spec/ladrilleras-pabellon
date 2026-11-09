@@ -1,17 +1,17 @@
 import {
   db, storage, collection, addDoc, updateDoc, deleteDoc, getDocs, doc,
   Timestamp, GeoPoint, ref, uploadBytes, getDownloadURL,
-} from "./db.js?v=31";
+} from "./db.js?v=32";
 import {
   abrirModal, cerrarModal, pillHtml, formatFechaHora, distanciaMetros,
   calcularEstadoPermiso, accionesHtmlReporte, OPCIONES_HALLAZGOS,
   OPCIONES_SANCION, SANCION_MULTA_TEXTO, SANCION_MULTA_MIN, SANCION_MULTA_MAX, SANCION_MULTA_SUGERIDA,
   UMA_DIARIA_MXN, UMA_VIGENCIA, calcularMultaPesos, formatPesosMXN, numeroALetrasPesos, SANCION_PLAZO_PAGO,
-} from "./utils.js?v=31";
-import { listarHornos } from "./hornos.js?v=31";
-import { listarPermisos } from "./permisos.js?v=31";
-import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=31";
-import { generarPdfInspeccion, generarPdfSancion } from "./pdf-inspeccion.js?v=31";
+} from "./utils.js?v=32";
+import { listarHornos } from "./hornos.js?v=32";
+import { listarPermisos } from "./permisos.js?v=32";
+import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=32";
+import { generarPdfInspeccion, generarPdfSancion } from "./pdf-inspeccion.js?v=32";
 
 const reportesCol = collection(db, "reportes_quema");
 const RADIO_MATCH_METROS = 150;
@@ -118,6 +118,12 @@ function bloqueResponsableHtml(reporte) {
       </div>
       <label>Manifestación / observaciones de identidad
         <textarea id="f-responsable-manifestacion" rows="2" placeholder="Datos adicionales que manifieste el responsable…">${reporte?.responsable_manifestacion || ""}</textarea>
+      </label>
+      <label>Firma de enterado (acta de sanción)
+        <select id="f-sancion-firma">
+          <option value="firmo" ${(reporte?.sancion_firma_estado || "firmo") === "firmo" ? "selected" : ""}>Sí firmó de enterado</option>
+          <option value="no_quiso_firmar" ${reporte?.sancion_firma_estado === "no_quiso_firmar" ? "selected" : ""}>No quiso firmar</option>
+        </select>
       </label>
     </div>
   `;
@@ -283,6 +289,7 @@ function payloadBaseReporte(data, verificacion) {
     responsable_id_tipo: data.responsable_id_tipo || "",
     responsable_id_folio: data.responsable_id_folio || "",
     responsable_manifestacion: data.responsable_manifestacion || "",
+    sancion_firma_estado: data.sancion_firma_estado || "firmo",
     sancion_infracciones: data.sancion_infracciones || [],
     sancion_umas: data.sancion_umas || "",
     sancion_uma_valor: UMA_DIARIA_MXN,
@@ -619,6 +626,7 @@ function leerCamposFormulario() {
     responsable_id_tipo: document.getElementById("f-responsable-id-tipo")?.value || "",
     responsable_id_folio: document.getElementById("f-responsable-id-folio")?.value.trim() || "",
     responsable_manifestacion: document.getElementById("f-responsable-manifestacion")?.value.trim() || "",
+    sancion_firma_estado: document.getElementById("f-sancion-firma")?.value || "firmo",
     sancion_infracciones,
     sancion_umas: document.getElementById("f-sancion-umas")?.value || "",
     sancion_observaciones: document.getElementById("f-sancion-obs")?.value.trim() || "",

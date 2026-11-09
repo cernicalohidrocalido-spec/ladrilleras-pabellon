@@ -11,7 +11,7 @@ import {
   formatPesosMXN,
   numeroALetrasPesos,
   SANCION_PLAZO_PAGO,
-} from "./utils.js?v=31";
+} from "./utils.js?v=32";
 
 const ETIQUETA_RESULTADO = {
   con_permiso_vigente: "Con permiso vigente",
@@ -148,6 +148,16 @@ function estilosComunes() {
     .firma-linea {
       margin: 48px auto 6px; width: 78%;
       border-bottom: 1.5px solid #334155;
+      position: relative; min-height: 1px;
+    }
+    .firma-linea-nota {
+      text-align: center; border-bottom-color: #9aa8b8;
+    }
+    .firma-linea-nota span {
+      display: inline-block; transform: translateY(-10px);
+      background: #fbfdff; padding: 0 8px;
+      font-size: 12px; font-weight: 700; color: #8b1e1e;
+      letter-spacing: .03em; text-transform: uppercase;
     }
     .firma-nombre {
       text-align: center; font-weight: 700; font-size: 12.5px; color: #12263a;
@@ -241,11 +251,14 @@ function fotosCompactasHtml(fotos) {
     .join("")}</div>`;
 }
 
-function firmaBoxHtml({ titulo, nombre, cargo }) {
+function firmaBoxHtml({ titulo, nombre, cargo, nota }) {
+  const linea = nota
+    ? `<div class="firma-linea firma-linea-nota"><span>${esc(nota)}</span></div>`
+    : `<div class="firma-linea"></div>`;
   return `
   <div class="firma-box">
     <h3>${esc(titulo)}</h3>
-    <div class="firma-linea"></div>
+    ${linea}
     <div class="firma-nombre">${esc(nombre || "—")}</div>
     ${cargo ? `<div class="firma-cargo">${esc(cargo)}</div>` : ""}
   </div>`;
@@ -508,6 +521,20 @@ export function generarPdfSancion(reporte, horno) {
       nombre: DIRECTOR_IMBIO,
       cargo: DIRECTOR_CARGO,
     })}
+    ${
+      (reporte.sancion_firma_estado || "firmo") === "no_quiso_firmar"
+        ? firmaBoxHtml({
+            titulo: "Firma de enterado del sancionado",
+            nombre: (reporte.responsable_nombre || "").trim() || "Persona sancionada",
+            cargo: "Se hace constar que fue notificado(a) y no quiso firmar el presente documento",
+            nota: "NO QUISO FIRMAR",
+          })
+        : firmaBoxHtml({
+            titulo: "Firma de enterado del sancionado",
+            nombre: (reporte.responsable_nombre || "").trim() || "Nombre de quien se sanciona",
+            cargo: "Enterado(a) de la sanción y de su contenido",
+          })
+    }
   </section>
 
   ${cadenaSeguridadHtml(cadena, folioSancion)}
