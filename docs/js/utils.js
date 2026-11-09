@@ -1,42 +1,120 @@
-Ôªø/** Checklist fijo de hallazgos para inspecci√≥n de ladrilleras. */
+/** Checklist fijo de hallazgos para inspecciÛn de ladrilleras. */
 export const OPCIONES_HALLAZGOS = [
-  { id: "quema_activa", label: "Quema activa al momento de la inspecci√≥n" },
-  { id: "humo_visible", label: "Emisi√≥n visible de humo / part√≠culas" },
-  { id: "combustible_no_autorizado", label: "Uso de combustible no autorizado (llanta, pl√°stico, etc.)" },
+  { id: "quema_activa", label: "Quema activa al momento de la inspecciÛn" },
+  { id: "humo_visible", label: "EmisiÛn visible de humo / partÌculas" },
+  { id: "combustible_no_autorizado", label: "Uso de combustible no autorizado (llanta, pl·stico, etc.)" },
   { id: "sin_permiso", label: "Sin permiso de quema vigente" },
-  { id: "fuera_horario", label: "Quema fuera de d√≠as u horario autorizado" },
+  { id: "fuera_horario", label: "Quema fuera de dÌas u horario autorizado" },
   { id: "horno_deteriorado", label: "Horno en mal estado o con riesgo de seguridad" },
-  { id: "residuos_combustible", label: "Residuos de combusti√≥n / basura en el predio" },
-  { id: "afectacion_vecinos", label: "Afectaci√≥n reportada a vecinos / v√≠a p√∫blica" },
+  { id: "residuos_combustible", label: "Residuos de combustiÛn / basura en el predio" },
+  { id: "afectacion_vecinos", label: "AfectaciÛn reportada a vecinos / vÌa p˙blica" },
   { id: "cumple_condiciones", label: "Cumple las condiciones del permiso" },
 ];
 
 /**
  * Infracciones aplicables a control de quema / ladrilleras
- * (Ley de Ingresos del Municipio de Pabell√≥n de Arteaga, ejercicio 2026).
+ * (Ley de Ingresos del Municipio de PabellÛn de Arteaga, ejercicio 2026).
  * Fuente: https://imbio.info/normativa-vigente/lectura.html?doc=ley-ingresos-2026
  */
 export const OPCIONES_SANCION = [
   {
     id: "c",
-    label: "c) Realice combusti√≥n de llantas;",
+    label: "c) Realice combustiÛn de llantas;",
   },
   {
     id: "f",
-    label: "f) Emita ostensiblemente contaminantes a la atm√≥sfera, tales como humos, polvos, gases, vapores u olores;",
+    label: "f) Emita ostensiblemente contaminantes a la atmÛsfera, tales como humos, polvos, gases, vapores u olores;",
   },
 ];
 
 /** Rango legal de multa para estas infracciones. */
 export const SANCION_MULTA_MIN = 100;
 export const SANCION_MULTA_MAX = 1000;
-/** Monto sugerido por defecto al levantar acta de sanci√≥n (dentro del rango legal). */
+/** Monto sugerido por defecto al levantar acta de sanciÛn (dentro del rango legal). */
 export const SANCION_MULTA_SUGERIDA = 500;
 
-export const SANCION_MULTA_TEXTO =
-  "Se sancionar√° con multa de 100 a 1,000 UMA (Unidad de Medida y Actualizaci√≥n), a su valor vigente al momento de cometer la infracci√≥n, a quien incurra en las conductas se√±aladas, conforme a la Ley de Ingresos del Municipio de Pabell√≥n de Arteaga, ejercicio fiscal 2026.";
+/** Valor diario UMA 2026 (INEGI, vigente desde 1 feb 2026). */
+export const UMA_DIARIA_MXN = 117.31;
+export const UMA_VIGENCIA = "1 de febrero de 2026";
 
-// --- C√°lculo de estado de un permiso a partir de sus fechas ---
+export const SANCION_MULTA_TEXTO =
+  "Se sancionar· con multa de 100 a 1,000 UMA (Unidad de Medida y ActualizaciÛn), a su valor vigente al momento de cometer la infracciÛn, a quien incurra en las conductas seÒaladas, conforme a la Ley de Ingresos del Municipio de PabellÛn de Arteaga, ejercicio fiscal 2026.";
+
+export const SANCION_PLAZO_PAGO =
+  "El infractor cuenta con 5 (cinco) dÌas h·biles para realizar el pago de la multa en la TesorerÌa Municipal del H. Ayuntamiento de PabellÛn de Arteaga, Aguascalientes.";
+
+export function calcularMultaPesos(umas, valorUma = UMA_DIARIA_MXN) {
+  const n = Number(umas);
+  if (!Number.isFinite(n) || n <= 0) return 0;
+  return Math.round(n * Number(valorUma) * 100) / 100;
+}
+
+export function formatPesosMXN(monto) {
+  return new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency: "MXN",
+    minimumFractionDigits: 2,
+  }).format(Number(monto) || 0);
+}
+
+/** Convierte un monto en pesos a letra (espaÒol MÈxico). */
+export function numeroALetrasPesos(monto) {
+  const total = Math.round((Number(monto) || 0) * 100);
+  const enteros = Math.floor(total / 100);
+  const centavos = total % 100;
+  const letras = _numeroALetras(enteros).toUpperCase();
+  const cent = String(centavos).padStart(2, "0");
+  return `${letras} PESOS ${cent}/100 M.N.`;
+}
+
+function _numeroALetras(n) {
+  if (n === 0) return "cero";
+  const u = ["", "un", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"];
+  const d = ["", "diez", "veinte", "treinta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa"];
+  const c = ["", "ciento", "doscientos", "trescientos", "cuatrocientos", "quinientos", "seiscientos", "setecientos", "ochocientos", "novecientos"];
+  const especiales = {
+    10: "diez", 11: "once", 12: "doce", 13: "trece", 14: "catorce", 15: "quince",
+    16: "diecisÈis", 17: "diecisiete", 18: "dieciocho", 19: "diecinueve",
+    20: "veinte", 21: "veinti˙n", 22: "veintidÛs", 23: "veintitrÈs", 24: "veinticuatro",
+    25: "veinticinco", 26: "veintisÈis", 27: "veintisiete", 28: "veintiocho", 29: "veintinueve",
+  };
+
+  function hasta999(num) {
+    if (num === 0) return "";
+    if (num === 100) return "cien";
+    if (especiales[num]) return especiales[num];
+    const cen = Math.floor(num / 100);
+    const resto = num % 100;
+    let out = cen ? c[cen] : "";
+    if (resto === 0) return out.trim();
+    if (especiales[resto]) return `${out} ${especiales[resto]}`.trim();
+    const dec = Math.floor(resto / 10);
+    const uni = resto % 10;
+    if (dec === 0) return `${out} ${u[uni]}`.trim();
+    if (dec === 1) return `${out} ${especiales[resto] || d[dec]}`.trim();
+    if (dec === 2 && uni > 0) return `${out} veinti${u[uni]}`.trim().replace("veintiun", "veinti˙n");
+    return `${out} ${d[dec]}${uni ? ` y ${u[uni]}` : ""}`.trim();
+  }
+
+  if (n < 1000) {
+    const t = hasta999(n);
+    return n === 1 ? "un" : t;
+  }
+  if (n < 1000000) {
+    const miles = Math.floor(n / 1000);
+    const resto = n % 1000;
+    const pref = miles === 1 ? "mil" : `${hasta999(miles)} mil`;
+    return resto ? `${pref} ${hasta999(resto)}` : pref;
+  }
+  const millones = Math.floor(n / 1000000);
+  const resto = n % 1000000;
+  const pref = millones === 1 ? "un millÛn" : `${hasta999(millones)} millones`;
+  if (!resto) return pref;
+  if (resto < 1000) return `${pref} ${hasta999(resto)}`;
+  return `${pref} ${_numeroALetras(resto)}`;
+}
+
+// --- C·lculo de estado de un permiso a partir de sus fechas ---
 // Devuelve 'vigente' | 'por_vencer' | 'vencido'
 export function calcularEstadoPermiso(permiso, ahora = new Date()) {
   const fin = permiso.fecha_vigencia_fin?.toDate
@@ -67,7 +145,7 @@ export function pillHtml(estado) {
   return `<span class="pill ${cls}">${label}</span>`;
 }
 
-// Posici√≥n (0-100%) del marcador en el gauge de temperatura
+// PosiciÛn (0-100%) del marcador en el gauge de temperatura
 export function gaugeHtml(estado) {
   const posMap = { vigente: 10, por_vencer: 50, vencido: 90 };
   const pos = posMap[estado] ?? 50;
@@ -75,7 +153,7 @@ export function gaugeHtml(estado) {
 }
 
 export function formatFecha(ts) {
-  if (!ts) return "‚Äî";
+  if (!ts) return "ó";
   const d = ts.toDate ? ts.toDate() : new Date(ts);
   return d.toLocaleDateString("es-MX", { year: "numeric", month: "short", day: "numeric" });
 }
@@ -89,18 +167,18 @@ export function toMillis(ts) {
   return Number.isNaN(d.getTime()) ? 0 : d.getTime();
 }
 
-/** Fecha de registro del permiso: registro ‚Üí solicitud ‚Üí autorizaci√≥n ‚Üí inicio de vigencia. */
+/** Fecha de registro del permiso: registro ? solicitud ? autorizaciÛn ? inicio de vigencia. */
 export function fechaRegistroPermiso(permiso) {
   return permiso?.fecha_registro || permiso?.fecha_solicitud || permiso?.fecha_autorizacion || permiso?.fecha_vigencia_inicio || null;
 }
 
 export function formatFechaHora(ts) {
-  if (!ts) return "‚Äî";
+  if (!ts) return "ó";
   const d = ts.toDate ? ts.toDate() : new Date(ts);
   return d.toLocaleString("es-MX", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
-// --- Modal gen√©rico ---
+// --- Modal genÈrico ---
 const overlay = document.getElementById("modal-overlay");
 const modalTitle = document.getElementById("modal-title");
 const modalBody = document.getElementById("modal-body");
@@ -129,9 +207,9 @@ export function confirmarAccion(mensaje) {
 export function accionesHtml(id) {
   return `
     <div class="row-actions">
-      <button class="row-btn" data-action="ver" data-id="${id}" title="Ver detalle">üëÅÔ∏è</button>
-      <button class="row-btn" data-action="editar" data-id="${id}" title="Editar">‚úèÔ∏è</button>
-      <button class="row-btn row-btn-danger" data-action="eliminar" data-id="${id}" title="Eliminar">üóëÔ∏è</button>
+      <button class="row-btn" data-action="ver" data-id="${id}" title="Ver detalle">???</button>
+      <button class="row-btn" data-action="editar" data-id="${id}" title="Editar">??</button>
+      <button class="row-btn row-btn-danger" data-action="eliminar" data-id="${id}" title="Eliminar">???</button>
     </div>
   `;
 }
@@ -139,8 +217,8 @@ export function accionesHtml(id) {
 export function accionesHtmlSimple(id) {
   return `
     <div class="row-actions">
-      <button class="row-btn" data-action="editar" data-id="${id}" title="Editar">‚úèÔ∏è</button>
-      <button class="row-btn row-btn-danger" data-action="eliminar" data-id="${id}" title="Eliminar">üóëÔ∏è</button>
+      <button class="row-btn" data-action="editar" data-id="${id}" title="Editar">??</button>
+      <button class="row-btn row-btn-danger" data-action="eliminar" data-id="${id}" title="Eliminar">???</button>
     </div>
   `;
 }
@@ -148,10 +226,10 @@ export function accionesHtmlSimple(id) {
 export function accionesHtmlReporte(id) {
   return `
     <div class="row-actions">
-      <button class="row-btn" data-action="pdf" data-id="${id}" title="Acta de inspecci√≥n (PDF)">üìã</button>
-      <button class="row-btn" data-action="pdf-sancion" data-id="${id}" title="Acta de sanci√≥n (PDF)">‚öñÔ∏è</button>
-      <button class="row-btn" data-action="editar" data-id="${id}" title="Editar">‚úèÔ∏è</button>
-      <button class="row-btn row-btn-danger" data-action="eliminar" data-id="${id}" title="Eliminar">üóëÔ∏è</button>
+      <button class="row-btn" data-action="pdf" data-id="${id}" title="Acta de inspecciÛn (PDF)">??</button>
+      <button class="row-btn" data-action="pdf-sancion" data-id="${id}" title="Acta de sanciÛn (PDF)">??</button>
+      <button class="row-btn" data-action="editar" data-id="${id}" title="Editar">??</button>
+      <button class="row-btn row-btn-danger" data-action="eliminar" data-id="${id}" title="Eliminar">???</button>
     </div>
   `;
 }

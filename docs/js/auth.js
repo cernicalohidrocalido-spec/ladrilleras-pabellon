@@ -1,4 +1,4 @@
-ï»¿import { auth, db, doc, getDoc, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "./db.js?v=24";
+import { auth, db, doc, getDoc, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "./db.js?v=25";
 
 const loginOverlay = document.getElementById("login-overlay");
 const appRoot = document.getElementById("app-root");
@@ -8,31 +8,31 @@ const loginError = document.getElementById("login-error");
 function mostrarApp(nombre) {
   loginOverlay.style.display = "none";
   appRoot.style.display = "grid";
-  authStatus.textContent = nombre ? `SesiÃ³n: ${nombre}` : "SesiÃ³n activa";
+  authStatus.textContent = nombre ? `Sesión: ${nombre}` : "Sesión activa";
   window.dispatchEvent(new CustomEvent("cq:autenticado"));
 }
 
 function mostrarLogin(mensaje) {
   loginOverlay.style.display = "flex";
   appRoot.style.display = "none";
-  authStatus.textContent = "Sin sesiÃ³n";
+  authStatus.textContent = "Sin sesión";
   if (mensaje) loginError.textContent = mensaje;
 }
 
-// --- Estado de sesiÃ³n ---
+// --- Estado de sesión ---
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     mostrarLogin();
     return;
   }
 
-  // Verifica que el usuario exista en usuarios_sistema y estÃ© activo,
-  // ya que las reglas de Firestore dependen de esa colecciÃ³n.
+  // Verifica que el usuario exista en usuarios_sistema y esté activo,
+  // ya que las reglas de Firestore dependen de esa colección.
   try {
     const snap = await getDoc(doc(db, "usuarios_sistema", user.uid));
     if (!snap.exists() || snap.data().activo !== true) {
       loginError.textContent =
-        "Tu cuenta no estÃ¡ dada de alta como usuario activo del sistema. Contacta al administrador.";
+        "Tu cuenta no está dada de alta como usuario activo del sistema. Contacta al administrador.";
       await signOut(auth);
       return;
     }
@@ -44,7 +44,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// --- BotÃ³n de login ---
+// --- Botón de login ---
 document.getElementById("login-btn").addEventListener("click", intentarLogin);
 document.getElementById("login-password").addEventListener("keydown", (e) => {
   if (e.key === "Enter") intentarLogin();
@@ -56,14 +56,14 @@ async function intentarLogin() {
   const password = document.getElementById("login-password").value;
 
   if (!email || !password) {
-    loginError.textContent = "Ingresa correo y contraseÃ±a.";
+    loginError.textContent = "Ingresa correo y contraseña.";
     return;
   }
 
   try {
     await signInWithEmailAndPassword(auth, email, password);
   } catch (err) {
-    loginError.textContent = "Correo o contraseÃ±a incorrectos.";
+    loginError.textContent = "Correo o contraseña incorrectos.";
   }
 }
 

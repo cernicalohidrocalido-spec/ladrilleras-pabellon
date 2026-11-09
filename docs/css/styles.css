@@ -557,6 +557,7 @@ h1 {
 }
 .fotos-bloque { display: flex; flex-direction: column; gap: 8px; }
 .fotos-acciones { display: flex; flex-wrap: wrap; gap: 8px; }
+.responsable-bloque,
 .sancion-bloque {
   display: flex;
   flex-direction: column;
@@ -572,6 +573,32 @@ h1 {
   line-height: 1.45;
   color: var(--text);
   font-weight: 500;
+}
+.uma-calc {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #b8c9db;
+  background: #eef3f8;
+}
+.uma-calc > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.uma-calc span {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.uma-calc strong {
+  font-size: 14px;
+  color: var(--navy-dark, #002A5C);
+  word-break: break-word;
 }
 .foto-thumb { position: relative; }
 .foto-quitar {

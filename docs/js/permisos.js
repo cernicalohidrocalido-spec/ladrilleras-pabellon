@@ -1,6 +1,6 @@
-Ôªøimport { db, collection, doc, addDoc, updateDoc, deleteDoc, getDocs, Timestamp } from "./db.js?v=24";
-import { abrirModal, cerrarModal, calcularEstadoPermiso, pillHtml, gaugeHtml, formatFecha, accionesHtmlSimple, toDateInputValue, toMillis, fechaRegistroPermiso } from "./utils.js?v=24";
-import { listarHornos } from "./hornos.js?v=24";
+import { db, collection, doc, addDoc, updateDoc, deleteDoc, getDocs, Timestamp } from "./db.js?v=25";
+import { abrirModal, cerrarModal, calcularEstadoPermiso, pillHtml, gaugeHtml, formatFecha, accionesHtmlSimple, toDateInputValue, toMillis, fechaRegistroPermiso } from "./utils.js?v=25";
+import { listarHornos } from "./hornos.js?v=25";
 
 const permisosCol = collection(db, "permisos");
 
@@ -75,24 +75,24 @@ export function renderTablaPermisos(permisos, hornosById) {
       const estado = calcularEstadoPermiso(p);
       const horno = hornosById[p.horno_id?.id] || {};
       const registro = fechaRegistroPermiso(p);
-      const ubicacion = p.nucleo_localidad || horno.direccion || "‚Äî";
+      const ubicacion = p.nucleo_localidad || horno.direccion || "ó";
       return `
       <tr>
-        <td style="font-family:var(--font-mono)">${p.folio || "‚Äî"}</td>
-        <td>${horno.nombre_referencia || "‚Äî"}</td>
+        <td style="font-family:var(--font-mono)">${p.folio || "ó"}</td>
+        <td>${horno.nombre_referencia || "ó"}</td>
         <td>
           <div class="celda-ubicacion">
             <span>${ubicacion}</span>
             ${
               horno.ubicacion
-                ? `<button type="button" class="btn-ver-mapa" data-action="mapa" data-horno-id="${horno.id}" title="Ver este horno en el mapa">üó∫Ô∏è Ver en el mapa</button>`
+                ? `<button type="button" class="btn-ver-mapa" data-action="mapa" data-horno-id="${horno.id}" title="Ver este horno en el mapa">??? Ver en el mapa</button>`
                 : ""
             }
           </div>
         </td>
         <td data-sort-value="${toMillis(registro)}">${formatFecha(registro)}</td>
-        <td>${formatFecha(p.fecha_vigencia_inicio)} ‚Äì ${formatFecha(p.fecha_vigencia_fin)}</td>
-        <td>${(p.dias_autorizados || []).join(", ") || "‚Äî"}</td>
+        <td>${formatFecha(p.fecha_vigencia_inicio)} ñ ${formatFecha(p.fecha_vigencia_fin)}</td>
+        <td>${(p.dias_autorizados || []).join(", ") || "ó"}</td>
         <td>${pillHtml(estado)} ${gaugeHtml(estado)}</td>
         <td>${accionesHtmlSimple(p.id)}</td>
       </tr>`;
@@ -100,7 +100,7 @@ export function renderTablaPermisos(permisos, hornosById) {
     .join("");
 }
 
-const DIAS = ["lunes", "martes", "mi√©rcoles", "jueves", "viernes", "s√°bado", "domingo"];
+const DIAS = ["lunes", "martes", "miÈrcoles", "jueves", "viernes", "s·bado", "domingo"];
 
 async function formPermisoHtml(permiso) {
   const hornos = await listarHornos();
@@ -122,8 +122,8 @@ async function formPermisoHtml(permiso) {
     <label>Folio
       <input type="text" id="f-folio" placeholder="PA-2026-0001" value="${permiso?.folio || ""}">
     </label>
-    <label>N√∫cleo de ladrilleras o localidad
-      <input type="text" id="f-nucleo" placeholder="Ej. N√∫cleo Las √Ånimas, Ojo Zarco‚Ä¶" value="${nucleoValor}">
+    <label>N˙cleo de ladrilleras o localidad
+      <input type="text" id="f-nucleo" placeholder="Ej. N˙cleo Las ¡nimas, Ojo ZarcoÖ" value="${nucleoValor}">
     </label>
     <div class="field-row">
       <label>Vigencia inicio
@@ -143,20 +143,20 @@ async function formPermisoHtml(permiso) {
     </div>
     <label>Combustible autorizado
       <select id="f-combustible">
-        ${["le√±a", "aserr√≠n", "gas"].map((c) => `<option ${permiso?.combustible_autorizado === c ? "selected" : ""}>${c}</option>`).join("")}
+        ${["leÒa", "aserrÌn", "gas"].map((c) => `<option ${permiso?.combustible_autorizado === c ? "selected" : ""}>${c}</option>`).join("")}
       </select>
     </label>
-    <label>D√≠as autorizados</label>
+    <label>DÌas autorizados</label>
     <div style="display:flex;flex-wrap:wrap;gap:8px;">${dias}</div>
     <label>Autorizado por
       <input type="text" id="f-autorizado-por" placeholder="Nombre del funcionario" value="${permiso?.autorizado_por || ""}">
     </label>
-    <button class="btn btn-primary" id="f-guardar">üíæ ${permiso ? "Guardar cambios" : "Guardar permiso"}</button>
+    <button class="btn btn-primary" id="f-guardar">?? ${permiso ? "Guardar cambios" : "Guardar permiso"}</button>
   `;
 }
 
 export async function abrirFormularioPermiso(onGuardado, permiso) {
-  abrirModal(permiso ? "‚úèÔ∏è Editar permiso" : "üìã Registrar tr√°mite de permiso", await formPermisoHtml(permiso));
+  abrirModal(permiso ? "?? Editar permiso" : "?? Registrar tr·mite de permiso", await formPermisoHtml(permiso));
   document.getElementById("f-guardar").addEventListener("click", async () => {
     const diasSeleccionados = Array.from(document.querySelectorAll(".f-dia:checked")).map(
       (el) => el.value

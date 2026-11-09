@@ -1,4 +1,4 @@
-ï»¿import { calcularEstadoPermiso, formatFecha, formatFechaHora } from "./utils.js?v=24";
+import { calcularEstadoPermiso, formatFecha, formatFechaHora } from "./utils.js?v=25";
 
 const ETIQUETA_ESTADO = {
   vigente: "Vigente",
@@ -25,7 +25,7 @@ export function exportarHornos(hornos) {
     "Referencia": h.nombre_referencia || "",
     "Propietario": h.propietario_nombre || "",
     "Contacto": h.propietario_contacto || "",
-    "DirecciÃ³n": h.direccion || "",
+    "Dirección": h.direccion || "",
     "Tipo de horno": h.tipo_horno || "",
     "Combustible habitual": h.combustible_habitual || "",
     "Estado": h.estado || "",
@@ -43,14 +43,14 @@ export function exportarPermisos(permisos, hornosById) {
     return {
       "Folio": p.folio || "",
       "Horno": horno.nombre_referencia || "",
-      "NÃºcleo / localidad": p.nucleo_localidad || "",
-      "UbicaciÃ³n": p.nucleo_localidad || horno.direccion || "",
+      "Núcleo / localidad": p.nucleo_localidad || "",
+      "Ubicación": p.nucleo_localidad || horno.direccion || "",
       "Propietario": horno.propietario_nombre || "",
       "Fecha registro": formatFecha(p.fecha_registro || p.fecha_solicitud || p.fecha_autorizacion || p.fecha_vigencia_inicio),
       "Vigencia inicio": formatFecha(p.fecha_vigencia_inicio),
       "Vigencia fin": formatFecha(p.fecha_vigencia_fin),
-      "DÃ­as autorizados": (p.dias_autorizados || []).join(", "),
-      "Horario": p.horario_autorizado ? `${p.horario_autorizado.inicio}â€“${p.horario_autorizado.fin}` : "",
+      "Días autorizados": (p.dias_autorizados || []).join(", "),
+      "Horario": p.horario_autorizado ? `${p.horario_autorizado.inicio}–${p.horario_autorizado.fin}` : "",
       "Combustible autorizado": p.combustible_autorizado || "",
       "Estado": ETIQUETA_ESTADO[estado] || estado,
       "Autorizado por": p.autorizado_por || "",
@@ -66,11 +66,11 @@ export function exportarReportes(reportes, hornosById) {
       "Folio": r.folio || "",
       "Fecha y hora": formatFechaHora(r.fecha_hora_reporte),
       "Origen": r.origen_reporte || "",
-      "NÃºcleo / localidad": r.nucleo_localidad || "",
-      "DirecciÃ³n reportada": r.direccion_reportada || "",
+      "Núcleo / localidad": r.nucleo_localidad || "",
+      "Dirección reportada": r.direccion_reportada || "",
       "Horno identificado": horno ? horno.nombre_referencia : "No identificado",
       "Resultado": ETIQUETA_RESULTADO[r.resultado_verificacion] || r.resultado_verificacion,
-      "DescripciÃ³n": r.descripcion || "",
+      "Descripción": r.descripcion || "",
       "Hallazgos": Array.isArray(r.hallazgos_checklist) && r.hallazgos_checklist.length
         ? r.hallazgos_checklist.join(", ")
         : (r.hallazgos || ""),
