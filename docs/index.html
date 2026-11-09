@@ -11,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<link rel="stylesheet" href="css/styles.css?v=20">
+<link rel="stylesheet" href="css/styles.css?v=21">
 </head>
 <body>
 
@@ -36,8 +36,18 @@
 
 <div class="app" id="app-root" style="display:none;">
 
+  <!-- Barra móvil -->
+  <header class="mobile-topbar" id="mobile-topbar">
+    <button type="button" class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Abrir menú">☰</button>
+    <div class="mobile-topbar-title">
+      <strong>Control de Quema</strong>
+      <span>IMBIO · Pabellón</span>
+    </div>
+  </header>
+  <div class="sidebar-backdrop" id="sidebar-backdrop" hidden></div>
+
   <!-- Sidebar -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img src="assets/logo-imbio.jpg" alt="IMBIO" class="brand-mark">
       <div class="brand-text">
@@ -229,6 +239,17 @@
     </section>
 
   </main>
+
+  <!-- Navegación inferior móvil -->
+  <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Secciones">
+    <button type="button" class="mobile-nav-item active" data-section="buscador"><span>🔍</span>Buscar</button>
+    <button type="button" class="mobile-nav-item" data-section="mapa"><span>🗺️</span>Mapa</button>
+    <button type="button" class="mobile-nav-item" data-section="hornos"><span>🧱</span>Hornos</button>
+    <button type="button" class="mobile-nav-item" data-section="permisos"><span>📋</span>Permisos</button>
+    <button type="button" class="mobile-nav-item" data-section="reportes"><span>🔥</span>Reportes</button>
+    <button type="button" class="mobile-nav-item" data-section="alertas"><span>🔔</span>Alertas</button>
+  </nav>
+
 </div>
 
 <!-- Modal genérico -->
@@ -244,16 +265,16 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
-<script type="module" src="js/db.js?v=20"></script>
-<script type="module" src="js/utils.js?v=20"></script>
-<script type="module" src="js/hornos.js?v=20"></script>
-<script type="module" src="js/permisos.js?v=20"></script>
-<script type="module" src="js/reportes.js?v=20"></script>
-<script type="module" src="js/mapa.js?v=20"></script>
-<script type="module" src="js/pdf-inspeccion.js?v=20"></script>
-<script type="module" src="js/exportar.js?v=20"></script>
-<script type="module" src="js/auth.js?v=20"></script>
-<script type="module" src="js/app.js?v=20"></script>
+<script type="module" src="js/db.js?v=21"></script>
+<script type="module" src="js/utils.js?v=21"></script>
+<script type="module" src="js/hornos.js?v=21"></script>
+<script type="module" src="js/permisos.js?v=21"></script>
+<script type="module" src="js/reportes.js?v=21"></script>
+<script type="module" src="js/mapa.js?v=21"></script>
+<script type="module" src="js/pdf-inspeccion.js?v=21"></script>
+<script type="module" src="js/exportar.js?v=21"></script>
+<script type="module" src="js/auth.js?v=21"></script>
+<script type="module" src="js/app.js?v=21"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"dcb1f5a126714bc6bc751bdc267b2a88","r":1,"spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>

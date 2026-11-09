@@ -1,15 +1,15 @@
 ﻿import {
   db, storage, collection, addDoc, updateDoc, deleteDoc, getDocs, doc,
   Timestamp, GeoPoint, ref, uploadBytes, getDownloadURL,
-} from "./db.js?v=20";
+} from "./db.js?v=21";
 import {
   abrirModal, cerrarModal, pillHtml, formatFechaHora, distanciaMetros,
   calcularEstadoPermiso, accionesHtmlReporte, OPCIONES_HALLAZGOS,
-} from "./utils.js?v=20";
-import { listarHornos } from "./hornos.js?v=20";
-import { listarPermisos } from "./permisos.js?v=20";
-import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=20";
-import { generarPdfInspeccion } from "./pdf-inspeccion.js?v=20";
+} from "./utils.js?v=21";
+import { listarHornos } from "./hornos.js?v=21";
+import { listarPermisos } from "./permisos.js?v=21";
+import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=21";
+import { generarPdfInspeccion } from "./pdf-inspeccion.js?v=21";
 
 const reportesCol = collection(db, "reportes_quema");
 const RADIO_MATCH_METROS = 150;

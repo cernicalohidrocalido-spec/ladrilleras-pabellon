@@ -1,4 +1,4 @@
-﻿import { calcularEstadoPermiso, formatFecha, formatFechaHora } from "./utils.js?v=20";
+﻿import { calcularEstadoPermiso, formatFecha, formatFechaHora } from "./utils.js?v=21";
 
 const ETIQUETA_ESTADO = {
   vigente: "Vigente",

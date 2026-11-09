@@ -1,25 +1,46 @@
-﻿import { listarHornos, renderTablaHornos, abrirFormularioHorno, eliminarHorno, abrirDetalleHorno } from "./hornos.js?v=20";
-import { listarPermisos, renderTablaPermisos, abrirFormularioPermiso, eliminarPermiso, ordenarPermisos } from "./permisos.js?v=20";
-import { listarReportes, renderTablaReportes, abrirFormularioReporte, abrirFormularioEditarReporte, eliminarReporte, generarPdfInspeccion } from "./reportes.js?v=20";
-import { pintarHornosEnMapa, conectarFiltrosMapa, enfocarHornoEnMapa } from "./mapa.js?v=20";
-import { calcularEstadoPermiso, pillHtml, formatFecha, confirmarAccion } from "./utils.js?v=20";
-import { exportarHornos, exportarPermisos, exportarReportes } from "./exportar.js?v=20";
+﻿import { listarHornos, renderTablaHornos, abrirFormularioHorno, eliminarHorno, abrirDetalleHorno } from "./hornos.js?v=21";
+import { listarPermisos, renderTablaPermisos, abrirFormularioPermiso, eliminarPermiso, ordenarPermisos } from "./permisos.js?v=21";
+import { listarReportes, renderTablaReportes, abrirFormularioReporte, abrirFormularioEditarReporte, eliminarReporte, generarPdfInspeccion } from "./reportes.js?v=21";
+import { pintarHornosEnMapa, conectarFiltrosMapa, enfocarHornoEnMapa } from "./mapa.js?v=21";
+import { calcularEstadoPermiso, pillHtml, formatFecha, confirmarAccion } from "./utils.js?v=21";
+import { exportarHornos, exportarPermisos, exportarReportes } from "./exportar.js?v=21";
 
 let sortPermisos = { campo: "registro", dir: "desc" };
 
+function cerrarMenuMovil() {
+  document.getElementById("sidebar")?.classList.remove("open");
+  const backdrop = document.getElementById("sidebar-backdrop");
+  if (backdrop) backdrop.hidden = true;
+}
+
+function abrirMenuMovil() {
+  document.getElementById("sidebar")?.classList.add("open");
+  const backdrop = document.getElementById("sidebar-backdrop");
+  if (backdrop) backdrop.hidden = false;
+}
+
 function irASeccion(nombre) {
-  document.querySelectorAll(".nav-item").forEach((b) => {
+  document.querySelectorAll(".nav-item, .mobile-nav-item").forEach((b) => {
     b.classList.toggle("active", b.dataset.section === nombre);
   });
   document.querySelectorAll(".section").forEach((s) => s.classList.remove("active"));
   document.getElementById(`section-${nombre}`)?.classList.add("active");
+  cerrarMenuMovil();
   if (nombre === "mapa") cargarMapa();
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-// --- Navegación entre secciones ---
-document.querySelectorAll(".nav-item").forEach((btn) => {
+// --- Navegación entre secciones (sidebar + bottom bar) ---
+document.querySelectorAll(".nav-item, .mobile-nav-item").forEach((btn) => {
   btn.addEventListener("click", () => irASeccion(btn.dataset.section));
 });
+
+document.getElementById("mobile-menu-btn")?.addEventListener("click", () => {
+  const sidebar = document.getElementById("sidebar");
+  if (sidebar?.classList.contains("open")) cerrarMenuMovil();
+  else abrirMenuMovil();
+});
+document.getElementById("sidebar-backdrop")?.addEventListener("click", cerrarMenuMovil);
 
 let cacheHornos = [];
 let cachePermisos = [];

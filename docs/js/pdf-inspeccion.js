@@ -1,4 +1,4 @@
-import { formatFechaHora, OPCIONES_HALLAZGOS } from "./utils.js?v=20";
+import { formatFechaHora, OPCIONES_HALLAZGOS } from "./utils.js?v=21";
 
 const ETIQUETA_RESULTADO = {
   con_permiso_vigente: "Con permiso vigente",
