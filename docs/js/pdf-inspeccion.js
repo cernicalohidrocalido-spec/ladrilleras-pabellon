@@ -1,4 +1,4 @@
-import { formatFechaHora } from "./utils.js?v=17";
+import { formatFechaHora } from "./utils.js?v=18";
 
 const ETIQUETA_RESULTADO = {
   con_permiso_vigente: "Con permiso vigente",

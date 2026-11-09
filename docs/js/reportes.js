@@ -1,15 +1,15 @@
 ﻿import {
   db, storage, collection, addDoc, updateDoc, deleteDoc, getDocs, doc,
   Timestamp, GeoPoint, ref, uploadBytes, getDownloadURL,
-} from "./db.js?v=17";
+} from "./db.js?v=18";
 import {
   abrirModal, cerrarModal, pillHtml, formatFechaHora, distanciaMetros,
   calcularEstadoPermiso, accionesHtmlReporte,
-} from "./utils.js?v=17";
-import { listarHornos } from "./hornos.js?v=17";
-import { listarPermisos } from "./permisos.js?v=17";
-import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=17";
-import { generarPdfInspeccion } from "./pdf-inspeccion.js?v=17";
+} from "./utils.js?v=18";
+import { listarHornos } from "./hornos.js?v=18";
+import { listarPermisos } from "./permisos.js?v=18";
+import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=18";
+import { generarPdfInspeccion } from "./pdf-inspeccion.js?v=18";
 
 const reportesCol = collection(db, "reportes_quema");
 const RADIO_MATCH_METROS = 150;
@@ -81,16 +81,32 @@ async function comprimirImagen(file, maxAncho = 1280, calidad = 0.82) {
   return blob || file;
 }
 
+function blobADataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
 async function subirFotosReporte(reporteId, archivos) {
   const subidas = [];
   for (let i = 0; i < archivos.length; i += 1) {
     const file = archivos[i];
     const blob = await comprimirImagen(file);
     const nombre = `foto_${Date.now()}_${i}.jpg`;
-    const storageRef = ref(storage, `reportes_quema/${reporteId}/${nombre}`);
-    await uploadBytes(storageRef, blob, { contentType: "image/jpeg" });
-    const url = await getDownloadURL(storageRef);
-    subidas.push({ url, nombre: file.name || nombre, contentType: "image/jpeg" });
+    try {
+      const storageRef = ref(storage, `reportes_quema/${reporteId}/${nombre}`);
+      await uploadBytes(storageRef, blob, { contentType: "image/jpeg" });
+      const url = await getDownloadURL(storageRef);
+      subidas.push({ url, nombre: file.name || nombre, contentType: "image/jpeg", origen: "storage" });
+    } catch (err) {
+      // Si Storage aún no está habilitado en el proyecto, guarda miniatura embebida.
+      console.warn("Storage no disponible, guardando foto embebida:", err?.message || err);
+      const dataUrl = await blobADataUrl(blob);
+      subidas.push({ url: dataUrl, nombre: file.name || nombre, contentType: "image/jpeg", origen: "embebida" });
+    }
   }
   return subidas;
 }
