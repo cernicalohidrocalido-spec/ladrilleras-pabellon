@@ -517,6 +517,36 @@ h1 {
   margin-top: 4px;
 }
 
+.hallazgos-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.hallazgos-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-alt, #f7f9fc);
+}
+.check-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+}
+.check-row input {
+  width: auto !important;
+  margin-top: 2px;
+  accent-color: var(--navy, #003B7A);
+}
+
 /* Selector propio de capas (Calles/Satélite) */
 .mapa-toolbar-row {
   display: flex;

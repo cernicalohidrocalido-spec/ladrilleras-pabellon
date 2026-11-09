@@ -1,4 +1,17 @@
-﻿// --- Cálculo de estado de un permiso a partir de sus fechas ---
+﻿/** Checklist fijo de hallazgos para inspección de ladrilleras. */
+export const OPCIONES_HALLAZGOS = [
+  { id: "quema_activa", label: "Quema activa al momento de la inspección" },
+  { id: "humo_visible", label: "Emisión visible de humo / partículas" },
+  { id: "combustible_no_autorizado", label: "Uso de combustible no autorizado (llanta, plástico, etc.)" },
+  { id: "sin_permiso", label: "Sin permiso de quema vigente" },
+  { id: "fuera_horario", label: "Quema fuera de días u horario autorizado" },
+  { id: "horno_deteriorado", label: "Horno en mal estado o con riesgo de seguridad" },
+  { id: "residuos_combustible", label: "Residuos de combustión / basura en el predio" },
+  { id: "afectacion_vecinos", label: "Afectación reportada a vecinos / vía pública" },
+  { id: "cumple_condiciones", label: "Cumple las condiciones del permiso" },
+];
+
+// --- Cálculo de estado de un permiso a partir de sus fechas ---
 // Devuelve 'vigente' | 'por_vencer' | 'vencido'
 export function calcularEstadoPermiso(permiso, ahora = new Date()) {
   const fin = permiso.fecha_vigencia_fin?.toDate

@@ -1,4 +1,4 @@
-﻿import { calcularEstadoPermiso, formatFecha, formatFechaHora } from "./utils.js?v=18";
+﻿import { calcularEstadoPermiso, formatFecha, formatFechaHora } from "./utils.js?v=19";
 
 const ETIQUETA_ESTADO = {
   vigente: "Vigente",
@@ -70,7 +70,10 @@ export function exportarReportes(reportes, hornosById) {
       "Horno identificado": horno ? horno.nombre_referencia : "No identificado",
       "Resultado": ETIQUETA_RESULTADO[r.resultado_verificacion] || r.resultado_verificacion,
       "Descripción": r.descripcion || "",
-      "Hallazgos": r.hallazgos || "",
+      "Hallazgos": Array.isArray(r.hallazgos_checklist) && r.hallazgos_checklist.length
+        ? r.hallazgos_checklist.join(", ")
+        : (r.hallazgos || ""),
+      "Observaciones adicionales": r.observaciones_adicionales || "",
       "Atendido por": r.atendido_por || "",
       "Seguimiento": r.seguimiento || "",
       "Fotos": Array.isArray(r.fotos) ? r.fotos.length : 0,

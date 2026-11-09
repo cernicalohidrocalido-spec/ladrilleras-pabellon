@@ -1,19 +1,48 @@
 ﻿import {
   db, storage, collection, addDoc, updateDoc, deleteDoc, getDocs, doc,
   Timestamp, GeoPoint, ref, uploadBytes, getDownloadURL,
-} from "./db.js?v=18";
+} from "./db.js?v=19";
 import {
   abrirModal, cerrarModal, pillHtml, formatFechaHora, distanciaMetros,
   calcularEstadoPermiso, accionesHtmlReporte,
-} from "./utils.js?v=18";
-import { listarHornos } from "./hornos.js?v=18";
-import { listarPermisos } from "./permisos.js?v=18";
-import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=18";
-import { generarPdfInspeccion } from "./pdf-inspeccion.js?v=18";
+} from "./utils.js?v=19";
+import { listarHornos } from "./hornos.js?v=19";
+import { listarPermisos } from "./permisos.js?v=19";
+import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=19";
+import { generarPdfInspeccion } from "./pdf-inspeccion.js?v=19";
 
 const reportesCol = collection(db, "reportes_quema");
 const RADIO_MATCH_METROS = 150;
 const MAX_FOTOS = 5;
+
+function checklistHallazgosHtml(seleccionados = []) {
+  const set = new Set(seleccionados || []);
+  return `
+    <div class="hallazgos-label">Hallazgos</div>
+    <div class="hallazgos-checklist" role="group" aria-label="Hallazgos de la inspección">
+      ${OPCIONES_HALLAZGOS.map(
+        (o) => `<label class="check-row">
+          <input type="checkbox" class="f-hallazgo" value="${o.id}" ${set.has(o.id) ? "checked" : ""}>
+          <span>${o.label}</span>
+        </label>`
+      ).join("")}
+    </div>
+  `;
+}
+
+function etiquetasHallazgos(ids = []) {
+  const mapa = Object.fromEntries(OPCIONES_HALLAZGOS.map((o) => [o.id, o.label]));
+  return (ids || []).map((id) => mapa[id] || id);
+}
+
+function textoHallazgosParaPdf(reporte) {
+  const checks = etiquetasHallazgos(reporte.hallazgos_checklist || []);
+  const obs = (reporte.observaciones_adicionales || reporte.hallazgos || "").trim();
+  const partes = [];
+  if (checks.length) partes.push(checks.map((t) => `• ${t}`).join("\n"));
+  if (obs) partes.push(`Observaciones adicionales:\n${obs}`);
+  return partes.join("\n\n") || "Sin hallazgos registrados.";
+}
 
 export async function listarReportes() {
   const snap = await getDocs(reportesCol);
@@ -119,7 +148,12 @@ export async function crearReporte(data, verificacion, archivosFoto = []) {
     direccion_reportada: data.direccion,
     nucleo_localidad: data.nucleo_localidad || "",
     descripcion: data.descripcion,
-    hallazgos: data.hallazgos || "",
+    hallazgos_checklist: data.hallazgos_checklist || [],
+    observaciones_adicionales: data.observaciones_adicionales || "",
+    hallazgos: textoHallazgosParaPdf({
+      hallazgos_checklist: data.hallazgos_checklist,
+      observaciones_adicionales: data.observaciones_adicionales,
+    }),
     horno_id_identificado: verificacion.horno ? doc(db, "hornos", verificacion.horno.id) : null,
     resultado_verificacion: verificacion.resultado,
     permiso_id_relacionado: verificacion.permiso ? doc(db, "permisos", verificacion.permiso.id) : null,
@@ -143,7 +177,12 @@ export async function actualizarReporte(id, data, archivosFoto = [], fotosExiste
     direccion_reportada: data.direccion,
     nucleo_localidad: data.nucleo_localidad || "",
     descripcion: data.descripcion,
-    hallazgos: data.hallazgos || "",
+    hallazgos_checklist: data.hallazgos_checklist || [],
+    observaciones_adicionales: data.observaciones_adicionales || "",
+    hallazgos: textoHallazgosParaPdf({
+      hallazgos_checklist: data.hallazgos_checklist,
+      observaciones_adicionales: data.observaciones_adicionales,
+    }),
     atendido_por: data.atendidoPor,
     seguimiento: data.seguimiento || "",
   };
@@ -222,8 +261,9 @@ function formInspeccionHtml(reporte) {
     <label>Descripción de la inspección
       <textarea id="f-descripcion" rows="2">${reporte?.descripcion || ""}</textarea>
     </label>
-    <label>Hallazgos
-      <textarea id="f-hallazgos" rows="2" placeholder="Condiciones del horno, humo, combustible, incumplimientos…">${reporte?.hallazgos || ""}</textarea>
+    ${checklistHallazgosHtml(reporte?.hallazgos_checklist || [])}
+    <label>Observaciones adicionales
+      <textarea id="f-observaciones" rows="2" placeholder="Detalle libre del inspector…">${reporte?.observaciones_adicionales || ""}</textarea>
     </label>
     <label>Atendido por (inspector)
       <input type="text" id="f-atendido" value="${reporte?.atendido_por || ""}">
@@ -349,6 +389,9 @@ function conectarMapaYGps(editando) {
 }
 
 function leerCamposFormulario() {
+  const hallazgos_checklist = Array.from(document.querySelectorAll(".f-hallazgo:checked")).map(
+    (el) => el.value
+  );
   return {
     origen: document.getElementById("f-origen").value,
     nucleo_localidad: document.getElementById("f-nucleo").value.trim(),
@@ -356,7 +399,8 @@ function leerCamposFormulario() {
     lat: document.getElementById("f-lat").value,
     lng: document.getElementById("f-lng").value,
     descripcion: document.getElementById("f-descripcion").value.trim(),
-    hallazgos: document.getElementById("f-hallazgos").value.trim(),
+    hallazgos_checklist,
+    observaciones_adicionales: document.getElementById("f-observaciones").value.trim(),
     atendidoPor: document.getElementById("f-atendido").value.trim(),
     seguimiento: document.getElementById("f-seguimiento").value.trim(),
   };
@@ -402,7 +446,9 @@ export function abrirFormularioReporte(onGuardado) {
         direccion_reportada: campos.direccion,
         ubicacion_reportada: { latitude: lat, longitude: lng },
         descripcion: campos.descripcion,
-        hallazgos: campos.hallazgos,
+        hallazgos_checklist: campos.hallazgos_checklist,
+        observaciones_adicionales: campos.observaciones_adicionales,
+        hallazgos: textoHallazgosParaPdf(campos),
         atendido_por: campos.atendidoPor,
         seguimiento: campos.seguimiento,
         resultado_verificacion: verificacion.resultado,

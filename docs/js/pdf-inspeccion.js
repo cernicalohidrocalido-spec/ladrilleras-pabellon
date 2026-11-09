@@ -1,4 +1,4 @@
-import { formatFechaHora } from "./utils.js?v=18";
+import { formatFechaHora, OPCIONES_HALLAZGOS } from "./utils.js?v=19";
 
 const ETIQUETA_RESULTADO = {
   con_permiso_vigente: "Con permiso vigente",
@@ -89,7 +89,22 @@ export function generarPdfInspeccion(reporte, horno) {
 
   <div class="box">
     <h2>Hallazgos</h2>
-    <p>${esc(reporte.hallazgos || "Sin hallazgos registrados.").replace(/\n/g, "<br>")}</p>
+    ${(() => {
+      const ids = reporte.hallazgos_checklist || [];
+      const mapa = Object.fromEntries(OPCIONES_HALLAZGOS.map((o) => [o.id, o.label]));
+      const lista = ids.length
+        ? `<ul>${ids.map((id) => `<li>${esc(mapa[id] || id)}</li>`).join("")}</ul>`
+        : `<p class="muted">Ningún hallazgo marcado.</p>`;
+      const obs = (reporte.observaciones_adicionales || "").trim();
+      // Compatibilidad con reportes viejos que solo tenían texto libre
+      const legado = !ids.length && !obs && reporte.hallazgos
+        ? `<p>${esc(reporte.hallazgos).replace(/\n/g, "<br>")}</p>`
+        : "";
+      const obsHtml = obs
+        ? `<p style="margin-top:10px"><strong>Observaciones adicionales:</strong><br>${esc(obs).replace(/\n/g, "<br>")}</p>`
+        : "";
+      return lista + legado + obsHtml;
+    })()}
   </div>
 
   <div class="box">
