@@ -1,9 +1,9 @@
-﻿import { listarHornos, renderTablaHornos, abrirFormularioHorno, eliminarHorno, abrirDetalleHorno } from "./hornos.js?v=12";
-import { listarPermisos, renderTablaPermisos, abrirFormularioPermiso, eliminarPermiso, ordenarPermisos } from "./permisos.js?v=12";
-import { listarReportes, renderTablaReportes, abrirFormularioReporte, abrirFormularioEditarReporte, eliminarReporte } from "./reportes.js?v=12";
-import { pintarHornosEnMapa } from "./mapa.js?v=12";
-import { calcularEstadoPermiso, pillHtml, formatFecha, confirmarAccion } from "./utils.js?v=12";
-import { exportarHornos, exportarPermisos, exportarReportes } from "./exportar.js?v=12";
+﻿import { listarHornos, renderTablaHornos, abrirFormularioHorno, eliminarHorno, abrirDetalleHorno } from "./hornos.js?v=13";
+import { listarPermisos, renderTablaPermisos, abrirFormularioPermiso, eliminarPermiso, ordenarPermisos } from "./permisos.js?v=13";
+import { listarReportes, renderTablaReportes, abrirFormularioReporte, abrirFormularioEditarReporte, eliminarReporte } from "./reportes.js?v=13";
+import { pintarHornosEnMapa, conectarFiltrosMapa } from "./mapa.js?v=13";
+import { calcularEstadoPermiso, pillHtml, formatFecha, confirmarAccion } from "./utils.js?v=13";
+import { exportarHornos, exportarPermisos, exportarReportes } from "./exportar.js?v=13";
 
 let sortPermisos = { campo: "registro", dir: "desc" };
 
@@ -114,6 +114,7 @@ function renderAlertas() {
 }
 
 function cargarMapa() {
+  conectarFiltrosMapa();
   const permisosPorHorno = {};
   cachePermisos.forEach((p) => {
     const hid = p.horno_id?.id;
