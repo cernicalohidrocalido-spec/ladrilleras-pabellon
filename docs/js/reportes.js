@@ -1,17 +1,17 @@
 import {
   db, storage, collection, addDoc, updateDoc, deleteDoc, getDocs, doc,
   Timestamp, GeoPoint, ref, uploadBytes, getDownloadURL,
-} from "./db.js?v=27";
+} from "./db.js?v=28";
 import {
   abrirModal, cerrarModal, pillHtml, formatFechaHora, distanciaMetros,
   calcularEstadoPermiso, accionesHtmlReporte, OPCIONES_HALLAZGOS,
   OPCIONES_SANCION, SANCION_MULTA_TEXTO, SANCION_MULTA_MIN, SANCION_MULTA_MAX, SANCION_MULTA_SUGERIDA,
   UMA_DIARIA_MXN, UMA_VIGENCIA, calcularMultaPesos, formatPesosMXN, numeroALetrasPesos, SANCION_PLAZO_PAGO,
-} from "./utils.js?v=27";
-import { listarHornos } from "./hornos.js?v=27";
-import { listarPermisos } from "./permisos.js?v=27";
-import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=27";
-import { generarPdfInspeccion, generarPdfSancion } from "./pdf-inspeccion.js?v=27";
+} from "./utils.js?v=28";
+import { listarHornos } from "./hornos.js?v=28";
+import { listarPermisos } from "./permisos.js?v=28";
+import { inicializarMapaPicker, actualizarMarcadorPicker } from "./mapa.js?v=28";
+import { generarPdfInspeccion, generarPdfSancion } from "./pdf-inspeccion.js?v=28";
 
 const reportesCol = collection(db, "reportes_quema");
 const RADIO_MATCH_METROS = 150;
@@ -278,8 +278,16 @@ function payloadBaseReporte(data, verificacion) {
       hallazgos_checklist: data.hallazgos_checklist,
       observaciones_adicionales: data.observaciones_adicionales,
     }),
+    responsable_nombre: data.responsable_nombre || "",
+    responsable_domicilio: data.responsable_domicilio || "",
+    responsable_id_tipo: data.responsable_id_tipo || "",
+    responsable_id_folio: data.responsable_id_folio || "",
+    responsable_manifestacion: data.responsable_manifestacion || "",
     sancion_infracciones: data.sancion_infracciones || [],
     sancion_umas: data.sancion_umas || "",
+    sancion_uma_valor: UMA_DIARIA_MXN,
+    sancion_pesos: (Number(data.sancion_umas) > 0 ? calcularMultaPesos(data.sancion_umas) : 0),
+    sancion_pesos_letra: (Number(data.sancion_umas) > 0 ? numeroALetrasPesos(calcularMultaPesos(data.sancion_umas)) : ""),
     sancion_observaciones: data.sancion_observaciones || "",
     atendido_por: data.atendidoPor,
     seguimiento: data.seguimiento || "",
@@ -388,9 +396,11 @@ function formInspeccionHtml(reporte) {
       <label>Núcleo de ladrilleras o localidad
         <input type="text" id="f-nucleo" placeholder="Ej. Núcleo Las Ánimas, Ojo Zarco…" value="${reporte?.nucleo_localidad || ""}">
       </label>
-      <label>Dirección aproximada
+            <label>Dirección aproximada del predio / horno
         <input type="text" id="f-direccion" value="${reporte?.direccion_reportada || ""}">
       </label>
+
+      ${bloqueResponsableHtml(reporte)}
 
       <label>Ubicación de la inspección</label>
       <div class="geo-toolbar">
@@ -604,6 +614,11 @@ function leerCamposFormulario() {
     descripcion: document.getElementById("f-descripcion").value.trim(),
     hallazgos_checklist,
     observaciones_adicionales: document.getElementById("f-observaciones").value.trim(),
+    responsable_nombre: document.getElementById("f-responsable-nombre")?.value.trim() || "",
+    responsable_domicilio: document.getElementById("f-responsable-domicilio")?.value.trim() || "",
+    responsable_id_tipo: document.getElementById("f-responsable-id-tipo")?.value || "",
+    responsable_id_folio: document.getElementById("f-responsable-id-folio")?.value.trim() || "",
+    responsable_manifestacion: document.getElementById("f-responsable-manifestacion")?.value.trim() || "",
     sancion_infracciones,
     sancion_umas: document.getElementById("f-sancion-umas")?.value || "",
     sancion_observaciones: document.getElementById("f-sancion-obs")?.value.trim() || "",

@@ -11,7 +11,7 @@ import {
   formatPesosMXN,
   numeroALetrasPesos,
   SANCION_PLAZO_PAGO,
-} from "./utils.js?v=27";
+} from "./utils.js?v=28";
 
 const ETIQUETA_RESULTADO = {
   con_permiso_vigente: "Con permiso vigente",
@@ -130,8 +130,12 @@ function estilosComunes() {
     .multa-box .letra { font-size: 12px; margin-top: 4px; }
     .multa-box .plazo { font-size: 11.5px; margin-top: 8px; font-weight: 600; }
     .firmas {
-      display: grid; grid-template-columns: 1fr; gap: 14px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
       margin: 16px 0 10px; page-break-inside: avoid;
+    }
+    .firmas.una { grid-template-columns: 1fr; max-width: 420px; margin-left: auto; margin-right: auto; }
+    @media (max-width: 700px) {
+      .firmas { grid-template-columns: 1fr; }
     }
     .firma-box {
       border: 1px solid #c8d6e5; border-radius: 8px; padding: 12px 14px 10px;
@@ -303,6 +307,7 @@ export function generarPdfInspeccion(reporte, horno) {
     folio,
     fechaTxt,
     inspector,
+    reporte.responsable_nombre,
     reporte.nucleo_localidad,
     reporte.direccion_reportada,
     coords,
@@ -359,6 +364,11 @@ export function generarPdfInspeccion(reporte, horno) {
       titulo: "Firma del inspector",
       nombre: inspector,
       cargo: "Inspector ambiental · IMBIO Pabellón de Arteaga",
+    })}
+    ${firmaBoxHtml({
+      titulo: "Firma del responsable de la ladrillera",
+      nombre: (reporte.responsable_nombre || "").trim() || "Nombre del responsable",
+      cargo: "Enterado(a) de los hechos consignados en esta acta",
     })}
   </section>
 
