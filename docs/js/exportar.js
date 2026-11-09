@@ -1,4 +1,4 @@
-import { calcularEstadoPermiso, formatFecha, formatFechaHora } from "./utils.js?v=11";
+﻿import { calcularEstadoPermiso, formatFecha, formatFechaHora } from "./utils.js?v=12";
 
 const ETIQUETA_ESTADO = {
   vigente: "Vigente",
@@ -44,7 +44,7 @@ export function exportarPermisos(permisos, hornosById) {
       "Folio": p.folio || "",
       "Horno": horno.nombre_referencia || "",
       "Propietario": horno.propietario_nombre || "",
-      "Fecha solicitud": formatFecha(p.fecha_solicitud),
+      "Fecha registro": formatFecha(p.fecha_registro || p.fecha_solicitud || p.fecha_autorizacion || p.fecha_vigencia_inicio),
       "Vigencia inicio": formatFecha(p.fecha_vigencia_inicio),
       "Vigencia fin": formatFecha(p.fecha_vigencia_fin),
       "Días autorizados": (p.dias_autorizados || []).join(", "),

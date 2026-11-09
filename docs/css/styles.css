@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --bg: #F3F4F7;
   --surface: #FFFFFF;
   --surface-alt: #F7F8FA;
@@ -287,6 +287,20 @@ h1 {
   border-bottom: 1px solid var(--border);
   background: var(--surface-alt);
 }
+
+.data-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.data-table th.sortable:hover { color: var(--navy); }
+.data-table th.sortable::after {
+  content: " ↕";
+  font-size: 10px;
+  opacity: 0.45;
+}
+.data-table th.sortable.is-sorted.asc::after { content: " ↑"; opacity: 1; color: var(--navy); }
+.data-table th.sortable.is-sorted.desc::after { content: " ↓"; opacity: 1; color: var(--navy); }
 
 .data-table td {
   padding: 13px 16px;

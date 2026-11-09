@@ -1,12 +1,34 @@
-import { db, collection, doc, addDoc, updateDoc, deleteDoc, getDocs, Timestamp } from "./db.js?v=11";
-import { abrirModal, cerrarModal, calcularEstadoPermiso, pillHtml, gaugeHtml, formatFecha, accionesHtmlSimple, toDateInputValue } from "./utils.js?v=11";
-import { listarHornos } from "./hornos.js?v=11";
+﻿import { db, collection, doc, addDoc, updateDoc, deleteDoc, getDocs, Timestamp } from "./db.js?v=12";
+import { abrirModal, cerrarModal, calcularEstadoPermiso, pillHtml, gaugeHtml, formatFecha, accionesHtmlSimple, toDateInputValue, toMillis, fechaRegistroPermiso } from "./utils.js?v=12";
+import { listarHornos } from "./hornos.js?v=12";
 
 const permisosCol = collection(db, "permisos");
 
 export async function listarPermisos() {
   const snap = await getDocs(permisosCol);
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
+
+export function ordenarPermisos(permisos, campo = "registro", direccion = "desc") {
+  const dir = direccion === "asc" ? 1 : -1;
+  const estadoRank = { vigente: 0, por_vencer: 1, vencido: 2 };
+  return [...permisos].sort((a, b) => {
+    let cmp = 0;
+    if (campo === "folio") {
+      cmp = String(a.folio || "").localeCompare(String(b.folio || ""), "es", { numeric: true, sensitivity: "base" });
+    } else if (campo === "vigencia") {
+      cmp = toMillis(a.fecha_vigencia_fin) - toMillis(b.fecha_vigencia_fin);
+    } else if (campo === "estado") {
+      cmp = (estadoRank[calcularEstadoPermiso(a)] ?? 9) - (estadoRank[calcularEstadoPermiso(b)] ?? 9);
+    } else {
+      // registro (default)
+      cmp = toMillis(fechaRegistroPermiso(a)) - toMillis(fechaRegistroPermiso(b));
+    }
+    if (cmp === 0) {
+      cmp = toMillis(fechaRegistroPermiso(a)) - toMillis(fechaRegistroPermiso(b));
+    }
+    return cmp * dir;
+  });
 }
 
 function construirDatosPermiso(data) {
@@ -23,10 +45,12 @@ function construirDatosPermiso(data) {
 }
 
 export async function crearPermiso(data) {
+  const ahora = Timestamp.now();
   return addDoc(permisosCol, {
     ...construirDatosPermiso(data),
-    fecha_solicitud: Timestamp.now(),
-    fecha_autorizacion: Timestamp.now(),
+    fecha_registro: ahora,
+    fecha_solicitud: ahora,
+    fecha_autorizacion: ahora,
     estado: "vigente",
   });
 }
@@ -41,14 +65,20 @@ export async function eliminarPermiso(id) {
 
 export function renderTablaPermisos(permisos, hornosById) {
   const tbody = document.querySelector("#tabla-permisos tbody");
+  if (!permisos.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="color:var(--text-muted);text-align:center;padding:24px">Sin permisos registrados.</td></tr>`;
+    return;
+  }
   tbody.innerHTML = permisos
     .map((p) => {
       const estado = calcularEstadoPermiso(p);
       const horno = hornosById[p.horno_id?.id] || {};
+      const registro = fechaRegistroPermiso(p);
       return `
       <tr>
         <td style="font-family:var(--font-mono)">${p.folio || "—"}</td>
         <td>${horno.nombre_referencia || "—"}</td>
+        <td data-sort-value="${toMillis(registro)}">${formatFecha(registro)}</td>
         <td>${formatFecha(p.fecha_vigencia_inicio)} – ${formatFecha(p.fecha_vigencia_fin)}</td>
         <td>${(p.dias_autorizados || []).join(", ") || "—"}</td>
         <td>${pillHtml(estado)} ${gaugeHtml(estado)}</td>

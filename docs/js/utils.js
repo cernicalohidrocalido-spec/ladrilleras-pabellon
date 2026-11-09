@@ -1,4 +1,4 @@
-// --- Cálculo de estado de un permiso a partir de sus fechas ---
+﻿// --- Cálculo de estado de un permiso a partir de sus fechas ---
 // Devuelve 'vigente' | 'por_vencer' | 'vencido'
 export function calcularEstadoPermiso(permiso, ahora = new Date()) {
   const fin = permiso.fecha_vigencia_fin?.toDate
@@ -40,6 +40,20 @@ export function formatFecha(ts) {
   if (!ts) return "—";
   const d = ts.toDate ? ts.toDate() : new Date(ts);
   return d.toLocaleDateString("es-MX", { year: "numeric", month: "short", day: "numeric" });
+}
+
+/** Convierte Timestamp / Date / string a milisegundos (0 si no hay fecha). */
+export function toMillis(ts) {
+  if (!ts) return 0;
+  if (typeof ts.toMillis === "function") return ts.toMillis();
+  if (typeof ts.toDate === "function") return ts.toDate().getTime();
+  const d = new Date(ts);
+  return Number.isNaN(d.getTime()) ? 0 : d.getTime();
+}
+
+/** Fecha de registro del permiso: registro → solicitud → autorización → inicio de vigencia. */
+export function fechaRegistroPermiso(permiso) {
+  return permiso?.fecha_registro || permiso?.fecha_solicitud || permiso?.fecha_autorizacion || permiso?.fecha_vigencia_inicio || null;
 }
 
 export function formatFechaHora(ts) {

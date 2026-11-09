@@ -1,9 +1,11 @@
-import { listarHornos, renderTablaHornos, abrirFormularioHorno, eliminarHorno, abrirDetalleHorno } from "./hornos.js?v=11";
-import { listarPermisos, renderTablaPermisos, abrirFormularioPermiso, eliminarPermiso } from "./permisos.js?v=11";
-import { listarReportes, renderTablaReportes, abrirFormularioReporte, abrirFormularioEditarReporte, eliminarReporte } from "./reportes.js?v=11";
-import { pintarHornosEnMapa } from "./mapa.js?v=11";
-import { calcularEstadoPermiso, pillHtml, formatFecha, confirmarAccion } from "./utils.js?v=11";
-import { exportarHornos, exportarPermisos, exportarReportes } from "./exportar.js?v=11";
+﻿import { listarHornos, renderTablaHornos, abrirFormularioHorno, eliminarHorno, abrirDetalleHorno } from "./hornos.js?v=12";
+import { listarPermisos, renderTablaPermisos, abrirFormularioPermiso, eliminarPermiso, ordenarPermisos } from "./permisos.js?v=12";
+import { listarReportes, renderTablaReportes, abrirFormularioReporte, abrirFormularioEditarReporte, eliminarReporte } from "./reportes.js?v=12";
+import { pintarHornosEnMapa } from "./mapa.js?v=12";
+import { calcularEstadoPermiso, pillHtml, formatFecha, confirmarAccion } from "./utils.js?v=12";
+import { exportarHornos, exportarPermisos, exportarReportes } from "./exportar.js?v=12";
+
+let sortPermisos = { campo: "registro", dir: "desc" };
 
 // --- Navegación entre secciones ---
 document.querySelectorAll(".nav-item").forEach((btn) => {
@@ -34,9 +36,24 @@ async function cargarTodo() {
   const porId = hornosById(cacheHornos);
 
   renderTablaHornos(cacheHornos);
-  renderTablaPermisos(cachePermisos, porId);
+  renderTablaPermisosOrdenada(porId);
   renderTablaReportes(cacheReportes, porId);
   actualizarKPIs();
+}
+
+function renderTablaPermisosOrdenada(porId = hornosById(cacheHornos)) {
+  const ordenados = ordenarPermisos(cachePermisos, sortPermisos.campo, sortPermisos.dir);
+  renderTablaPermisos(ordenados, porId);
+  actualizarIndicadoresSortPermisos();
+}
+
+function actualizarIndicadoresSortPermisos() {
+  document.querySelectorAll("#tabla-permisos thead th.sortable").forEach((th) => {
+    const activo = th.dataset.sort === sortPermisos.campo;
+    th.classList.toggle("is-sorted", activo);
+    th.classList.toggle("asc", activo && sortPermisos.dir === "asc");
+    th.classList.toggle("desc", activo && sortPermisos.dir === "desc");
+  });
 }
 
 function actualizarKPIs() {
@@ -216,6 +233,19 @@ document.querySelector("#tabla-hornos tbody").addEventListener("click", async (e
     const reportesDelHorno = cacheReportes.filter((r) => r.horno_id_identificado?.id === horno.id);
     abrirDetalleHorno(horno, permisosDelHorno, reportesDelHorno);
   }
+});
+
+document.querySelector("#tabla-permisos thead").addEventListener("click", (e) => {
+  const th = e.target.closest("th.sortable[data-sort]");
+  if (!th) return;
+  const campo = th.dataset.sort;
+  if (sortPermisos.campo === campo) {
+    sortPermisos.dir = sortPermisos.dir === "desc" ? "asc" : "desc";
+  } else {
+    sortPermisos.campo = campo;
+    sortPermisos.dir = campo === "registro" || campo === "vigencia" ? "desc" : "asc";
+  }
+  renderTablaPermisosOrdenada();
 });
 
 document.querySelector("#tabla-permisos tbody").addEventListener("click", async (e) => {

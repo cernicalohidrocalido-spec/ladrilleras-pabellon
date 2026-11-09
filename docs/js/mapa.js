@@ -1,4 +1,4 @@
-import { calcularEstadoPermiso } from "./utils.js?v=11";
+﻿import { calcularEstadoPermiso } from "./utils.js?v=12";
 
 // Coordenadas reales de la cabecera municipal de Pabellón de Arteaga, Ags.
 export const CENTRO_PABELLON = [22.1492, -102.2765];
